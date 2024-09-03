@@ -1,0 +1,4 @@
+* Lab3
+
+Write your own function that converts a color image into a mirror color image.
+(Think about your algorithm first!)

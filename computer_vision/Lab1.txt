@@ -1,0 +1,5 @@
+﻿* Lab1
+
+Write your own function that converts a color image into a grayscale image.
+
+Using the following formula: I = 0.299 × R + 0.587 × G + 0.114 × B
