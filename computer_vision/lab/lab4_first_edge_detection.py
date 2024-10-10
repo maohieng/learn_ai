@@ -7,7 +7,8 @@ mOutImg = readimg.copy()
 #extract height and width
 height, width, channel=readimg.shape
 print(width,height,channel)
-#initailize 0
+
+# Temporary Arrays for Sobel Calculations
 pTmpXB = (width*height)*[0]
 pTmpXG = (width*height)*[0]
 pTmpXR = (width*height)*[0]
@@ -16,6 +17,8 @@ pTmpYG = (width*height)*[0]
 pTmpYR = (width*height)*[0]
 #initailize image to black or 0
 mOutImg = mOutImg*0
+
+# Sobel Filtering
 #apply mask to original image
 for i in range(1,height-1):
     for j in range(1,width-1):
@@ -43,7 +46,9 @@ for i in range(1,height-1):
         pTmpXB[i*width+j] = newValueBx
         pTmpXG[i*width+j] = newValueGx
         pTmpXR[i*width+j] = newValueRx
-#convert to positive
+
+# Absolute Values of Sobel Responses
+# convert to positive
 for i in range(1,height-1):
     for j in range(1,width-1):
         constBVal1,constGVal1,constRVal1=pTmpXB[i*width+j],pTmpXG[i*width+j],pTmpXR[i*width+j]
@@ -83,6 +88,7 @@ for i in range(1,height-1):
             minR = newValueR
         if(newValueR>maxR):
             maxR = newValueR
+# Normalization: 
 # normalize number --> can be range from 0 to 1 (original from 0 to 255)
 constBVal1 = (float(255.0/(maxB-minB)))
 constBVal2 = (float(-255.0*minB/(maxB-minB)))
@@ -90,7 +96,8 @@ constGVal1 = (float(255.0/(maxG-minG)))
 constGVal2 = (float(-255.0*minG/(maxG-minG)))
 constRVal1 = (float(255.0/(maxR-minR)))
 constRVal2 = (float(-255.0 * minR/(maxR-minR)))
-# apply new RGB
+
+# Apply Normalized Values and Store in Output Image
 for i in range(1,height-1):
     for j in range(1,width-1):
         newValueB = pTmpXB[i*width+j]
