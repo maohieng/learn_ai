@@ -30,7 +30,13 @@ class Gridworld:
 def q_learning(env, alpha=0.1, gamma=0.9, epsilon=0.1, episodes=1000):
     Q = np.zeros((env.size, env.size, 4))
     for episode in range(episodes):
+        # debug = (episode+1) % 100 == 0
+        debug = False
+        if debug:
+            print(f"Learning Episode {episode + 1}")
+
         state = env.reset()
+        step = 0
         while True:
             if np.random.rand() < epsilon:
                 action = np.random.choice(4)
@@ -40,9 +46,24 @@ def q_learning(env, alpha=0.1, gamma=0.9, epsilon=0.1, episodes=1000):
             next_state, reward, done = env.step(action)
             # Write the formula here
             # You can review the formula in the lesson
+            
+            best_next_action = np.argmax(Q[next_state])
+
+            if debug:
+                print(f"- State: {state}, Action: {action}, Next State: {next_state}, Reward: {reward}, Done: {done}, Best Next Action: {best_next_action}")
+
+            future_reward_estimate = gamma * Q[next_state][best_next_action]
+            new_value_estimate = reward + future_reward_estimate - Q[state][action]
+
+            Q[state][action] += alpha * new_value_estimate
+
             state = next_state
+            
+            step += 1
             if done:
+                print(f"Episode {episode + 1} finished after {step} steps")
                 break
+            
     return Q
 
 env = Gridworld(5, (0, 0), (4, 4))

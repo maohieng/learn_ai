@@ -6,9 +6,9 @@ from sklearn.linear_model import Perceptron
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 
-#model = Perceptron()
-#model = svm.SVC()
-#model = KNeighborsClassifier(n_neighbors=1)
+# model = Perceptron()
+# model = svm.SVC()
+# model = KNeighborsClassifier(n_neighbors=1)
 model = GaussianNB()
 
 # Read data in from file
@@ -18,6 +18,7 @@ with open("banknotes.csv") as f:
 
     data = []
     for row in reader:
+        # Authentic លុយពិត, Counterfeit លុយក្លែងក្លាយ
         data.append({
             "evidence": [float(cell) for cell in row[:4]],
             "label": "Authentic" if row[4] == "0" else "Counterfeit"
@@ -51,7 +52,8 @@ for actual, predicted in zip(y_testing, predictions):
         incorrect += 1
 
 # Print results
-print(f"Results for model {type(model).__name__}")
-print(f"Correct: {correct}")
-print(f"Incorrect: {incorrect}")
-print(f"Accuracy: {100 * correct / total:.2f}%")
+print(f"- Results for model {type(model).__name__}")
+print(f"- Correct: {correct}")
+print(f"- Incorrect: {incorrect}")
+print(f"- Accuracy: {100 * correct / total:.2f}%")
+
