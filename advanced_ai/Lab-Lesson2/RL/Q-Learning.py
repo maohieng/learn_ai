@@ -28,10 +28,17 @@ class Gridworld:
         return self.state, reward, done
 
 def q_learning(env, alpha=0.1, gamma=0.9, epsilon=0.1, episodes=1000):
+    ''' Q-Learning Algorithm: This function implements the Q-Learning 
+    algorithm to learn the Q-Values of the environment. The Q-Values are
+    stored in a 3D numpy array with the shape (env.size, env.size, 4) where
+    the first two dimensions represent the state space and the last dimension
+    represents the action space. The function returns the Q-Values after
+    the learning process is complete.
+    '''
     Q = np.zeros((env.size, env.size, 4))
     for episode in range(episodes):
         # debug = (episode+1) % 100 == 0
-        debug = False
+        debug = True
         if debug:
             print(f"Learning Episode {episode + 1}")
 
@@ -47,12 +54,11 @@ def q_learning(env, alpha=0.1, gamma=0.9, epsilon=0.1, episodes=1000):
             # Write the formula here
             # You can review the formula in the lesson
             
-            best_next_action = np.argmax(Q[next_state])
+            next_action = np.argmax(Q[next_state])
 
-            if debug:
-                print(f"- State: {state}, Action: {action}, Next State: {next_state}, Reward: {reward}, Done: {done}, Best Next Action: {best_next_action}")
+            max_action_of_q = Q[next_state][next_action].max()
 
-            future_reward_estimate = gamma * Q[next_state][best_next_action]
+            future_reward_estimate = gamma * max_action_of_q
             new_value_estimate = reward + future_reward_estimate - Q[state][action]
 
             Q[state][action] += alpha * new_value_estimate
@@ -67,6 +73,6 @@ def q_learning(env, alpha=0.1, gamma=0.9, epsilon=0.1, episodes=1000):
     return Q
 
 env = Gridworld(5, (0, 0), (4, 4))
-Q = q_learning(env)
+Q = q_learning(env, episodes=1)
 print("Q-Values:")
 print(Q)
