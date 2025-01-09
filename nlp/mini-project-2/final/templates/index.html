@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classify Review</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .xcard {
+        transition: all 0.1s ease-in-out;
+        height: 230px;
+      }
+
+      .prediction {
+        transition: all 0.3s ease-in-out;
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      .prediction.visible {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-gray-900 text-white flex items-center justify-center min-h-screen"
+  >
+    <div
+      class="bg-gray-800 p-8 rounded-2xl shadow-md w-full max-w-md xcard"
+      id="xcard"
+    >
+      <div class="flex flex-row items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Classify Review</h1>
+        <a
+          type="reset"
+          href="/"
+          class="bg-gray-600 text-gray-300 px-4 py-2 rounded hover:bg-gray-500 rounded-2xl flex items-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill="currentColor"
+              d="M10 0a10 10 0 1 0 10 10A10 10 0 0 0 10 0m5.66 14.24l-1.41 1.41L10 11.41l-4.24 4.25l-1.42-1.42L8.59 10L4.34 5.76l1.42-1.42L10 8.59l4.24-4.24l1.41 1.41L11.41 10z"
+            />
+          </svg>
+
+          <span class="ml-2"> Clear </span>
+        </a>
+      </div>
+      <textarea
+        name="review"
+        rows="4"
+        cols="50"
+        placeholder="Enter your review here..."
+        class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white"
+        id="review-textarea"
+      >
+{{review}}</textarea
+      ><br />
+      <div class="flex flex-row gap-4 items-center justify-end"></div>
+      {% if prediction %}
+      <h2 class="text-xl font-semibold mt-4 prediction" id="prediction">
+        Prediction: {{ prediction }}
+      </h2>
+      {% endif %}
+    </div>
+    <script>
+      const xcard = document.getElementById("xcard");
+      function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+          const context = this;
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+      }
+
+      async function fetchPrediction(review) {
+        if (review.trim() === "") {
+          const predictionElement = document.getElementById("prediction");
+          if (predictionElement) {
+            predictionElement.remove();
+          }
+          xcard.style.height = "230px";
+          return;
+        }
+
+        const response = await fetch("/api/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ review }),
+        });
+        xcard.style.height = "270px";
+        const data = await response.json();
+        const predictionElement = document.getElementById("prediction");
+        if (data.prediction) {
+          if (predictionElement) {
+            predictionElement.textContent = `Prediction: ${data.prediction}`;
+            predictionElement.classList.add("visible");
+          } else {
+            const newPredictionElement = document.createElement("h2");
+            newPredictionElement.style.transition = "all 0.3s ease-in-out";
+            newPredictionElement.style.transform = "translateY(-100%)";
+            newPredictionElement.className =
+              "text-xl font-semibold mt-4 prediction visible";
+            newPredictionElement.id = "prediction";
+            newPredictionElement.style.transform = "translateY(0)";
+            newPredictionElement.textContent = `Prediction: ${data.prediction}`;
+            document
+              .querySelector(".bg-gray-800")
+              .appendChild(newPredictionElement);
+          }
+        }
+      }
+
+      const debouncedFetchPrediction = debounce(fetchPrediction, 1000);
+
+      document
+        .getElementById("review-textarea")
+        .addEventListener("input", function () {
+          // clear the previous prediction
+          const predictionElement = document.getElementById("prediction");
+          if (predictionElement) {
+            predictionElement.innerHTML = "Checking...";
+          }
+          debouncedFetchPrediction(this.value);
+        });
+    </script>
+  </body>
+</html>

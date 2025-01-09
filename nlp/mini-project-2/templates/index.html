@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classify Review</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen">
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4">Classify Review</h1>
+        <form action="/predict" method="post" class="space-y-4">
+            <textarea name="review" rows="4" cols="50" placeholder="Enter your review here..." class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white"
+            >{{review}}</textarea><br>
+            <div class="flex flex-row gap-4 items-center justify-end">
+                <a type="reset" href="/" class="bg-gray-600 text-gray-300 px-4 py-2 rounded hover:bg-gray-500 rounded-2xl flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20"><path fill="currentColor" d="M10 0a10 10 0 1 0 10 10A10 10 0 0 0 10 0m5.66 14.24l-1.41 1.41L10 11.41l-4.24 4.25l-1.42-1.42L8.59 10L4.34 5.76l1.42-1.42L10 8.59l4.24-4.24l1.41 1.41L11.41 10z"/></svg>
+                    
+                    <span class="ml-2">
+                        Clear
+                    </span>
+                </a>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 rounded-2xl flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48"><defs><mask id="ipTSearch0"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path fill="#555555" d="M21 38c9.389 0 17-7.611 17-17S30.389 4 21 4S4 11.611 4 21s7.611 17 17 17Z"/><path stroke-linecap="round" d="M26.657 14.343A7.98 7.98 0 0 0 21 12a7.98 7.98 0 0 0-5.657 2.343m17.879 18.879l8.485 8.485"/></g></mask></defs><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipTSearch0)"/></svg>
+                    
+                    <span class="ml-2">
+                        Check
+                    </span>
+                </button>
+            </div>
+        </form>
+        {% if prediction %}
+            <h2 class="text-xl font-semibold mt-4">Prediction: {{ prediction }}</h2>
+        {% endif %}
+    </div>
+</body>
+</html>

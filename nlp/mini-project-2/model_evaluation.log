@@ -1,0 +1,8 @@
+2025-01-08 16:16:10,658 - INFO - Logistic Regression Accuracy: 0.93
+2025-01-08 16:16:10,735 - INFO - Logistic Regression without TF-IDF Accuracy: 0.70
+2025-01-08 16:16:11,410 - INFO - Naive Bayes Accuracy: 0.90
+2025-01-08 16:16:11,443 - INFO - Naive Bayes without TF-IDF Accuracy: 0.70
+2025-01-08 16:21:54,418 - INFO - Random Forest Accuracy: 0.93
+2025-01-08 16:21:55,747 - INFO - Random Forest without TF-IDF Accuracy: 0.71
+2025-01-08 16:23:00,916 - INFO - DNN Accuracy: 0.93
+2025-01-08 16:23:12,105 - INFO - DNN without TF-IDF Accuracy: 0.70
