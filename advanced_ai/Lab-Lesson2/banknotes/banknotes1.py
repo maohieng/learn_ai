@@ -29,7 +29,7 @@ evidence = [row["evidence"] for row in data]
 labels = [row["label"] for row in data]
 
 X_training, X_testing, y_training, y_testing = train_test_split(
-    evidence, labels, test_size=0.4
+    evidence, labels, test_size=0.3
 )
 
 # Fit model

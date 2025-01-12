@@ -175,10 +175,16 @@ def train(n):
 
     player = NimAI()
 
+    # Metrics to track
+    moves_per_game = []
+    rewards_per_game = []
+
     # Play n games
     for i in range(n):
-        print(f"Playing training game {i + 1}")
         game = Nim()
+
+        moves = 0
+        total_reward = 0
 
         # Keep track of last move made by either player
         last = {
@@ -200,9 +206,12 @@ def train(n):
             # Make move
             game.move(action)
             new_state = game.piles.copy()
+            moves += 1
 
             # When game is over, update Q values with rewards
             if game.winner is not None:
+                reward = -1
+                total_reward += reward
                 player.update(state, action, new_state, -1)
                 player.update(
                     last[game.player]["state"],
@@ -221,10 +230,16 @@ def train(n):
                     0
                 )
 
+        print(f"Playing training game {i + 1}, moves: {moves}, reward: {total_reward}")
+
+        # Record metrics
+        moves_per_game.append(moves)
+        rewards_per_game.append(total_reward)
+
     print("Done training")
 
     # Return the trained AI
-    return player
+    return player, (moves_per_game, rewards_per_game)
 
 
 def play(ai, human_player=None):
