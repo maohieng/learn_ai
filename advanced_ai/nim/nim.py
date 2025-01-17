@@ -1,6 +1,6 @@
-import math
 import random
 import time
+import pickle
 
 
 class Nim():
@@ -85,6 +85,7 @@ class NimAI():
         self.q = dict()
         self.alpha = alpha
         self.epsilon = epsilon
+        self.train_moves = []
 
     def update(self, old_state, action, new_state, reward):
         """
@@ -133,11 +134,19 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        action = Nim.available_actions(state)
-        if not action:
+        actions = Nim.available_actions(state)
+        if not actions:
             return 0
         
-        return max([self.get_q_value(state, act) for act in action])
+        max_q = float('-inf')
+        for action in actions:
+            q = self.get_q_value(state, action)
+            if q > max_q:
+                max_q = q
+
+        if max_q == float('-inf'):
+            return 0
+        return max_q
 
     def choose_action(self, state, epsilon=True):
         """
@@ -154,19 +163,41 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        actions = list(Nim.available_actions(state))
+        actions = Nim.available_actions(state)
         if not actions:
-            raise Exception("No available actions")
+            None
         
         if epsilon and random.random() < self.epsilon:
-            return random.choice(actions)
+            return random.choice(list(actions))
         
         # Find action with the highest Q-value
-        q_values = [self.get_q_value(state, action) for action in actions]
-        max_q = max(q_values)
-        best_actions = [actions[i] for i in range(len(actions)) if q_values[i] == max_q]
+        max_q = float('-inf')
+        best_actions = []
+        for action in actions:
+            q = self.get_q_value(state, action)
+            if q > max_q:
+                max_q = q
+                best_actions = [action]
+            elif q == max_q:
+                best_actions.append(action)
         
         return random.choice(best_actions)
+    
+    def save(self, filename):
+        """
+        Save the whole object to a file using pickle.
+        """
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, filename):
+        """
+        Load the object from a pickle file.
+        """
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
+            
 
 def train(n):
     """
@@ -175,16 +206,11 @@ def train(n):
 
     player = NimAI()
 
-    # Metrics to track
-    moves_per_game = []
-    rewards_per_game = []
-
     # Play n games
     for i in range(n):
         game = Nim()
 
         moves = 0
-        total_reward = 0
 
         # Keep track of last move made by either player
         last = {
@@ -210,8 +236,6 @@ def train(n):
 
             # When game is over, update Q values with rewards
             if game.winner is not None:
-                reward = -1
-                total_reward += reward
                 player.update(state, action, new_state, -1)
                 player.update(
                     last[game.player]["state"],
@@ -230,16 +254,13 @@ def train(n):
                     0
                 )
 
-        print(f"Playing training game {i + 1}, moves: {moves}, reward: {total_reward}")
-
-        # Record metrics
-        moves_per_game.append(moves)
-        rewards_per_game.append(total_reward)
+        print(f"Playing training game {i + 1}, moves: {moves}")
+        player.train_moves.append(moves)
 
     print("Done training")
 
     # Return the trained AI
-    return player, (moves_per_game, rewards_per_game)
+    return player
 
 
 def play(ai, human_player=None):

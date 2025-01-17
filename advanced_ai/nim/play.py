@@ -1,28 +1,34 @@
-from nim import train, play
+from nim import train, play, NimAI
 import matplotlib.pyplot as plt
 
-ai, (moves_per_game, rewards_per_game) = train(10000)
+# Train or load the AI
+if input("Train a new AI? [y/n]: ").lower() == "y":
+    ai = train(10000)
+    filename = input("Enter the filename to save the AI: ")
+    ai.save(f'{filename}.pkl')
+else:
+    filename = input("Enter the filename of the AI: ")
+    ai = NimAI.load(f'{filename}.pkl')
 
 # Visualize metrics
 plt.figure(figsize=(12, 6))
 
-# Move per game
-plt.subplot(1, 2, 1)
-plt.plot(moves_per_game, label="Moves per game")
-plt.xlabel("Game Number")
-plt.ylabel("Number of Moves")
-plt.title("Move per Game During Training")
-plt.legend()
+# Plot moves made during training for pos % 10 == 0
+trained_moves = [m for i, m in enumerate(ai.train_moves) if i % 20 == 0]
+plt.plot(trained_moves, label="Moves")
 
-# Reward per game
-plt.subplot(1, 2, 2)
-plt.plot(rewards_per_game, label="Total Reward per game", color="orange")
-plt.xlabel("Game Number")
-plt.ylabel("Total Reward")
-plt.title("Total Reward per Game During Training")
-plt.legend()
+# display min, max, and average moves
+min_moves = min(trained_moves)
+max_moves = max(trained_moves)
+avg_moves = sum(trained_moves) / len(trained_moves)
+plt.axhline(min_moves, color="red", linestyle="--", label=f"Min Moves ({min_moves})")
+plt.axhline(max_moves, color="green", linestyle="--", label=f"Max Moves ({max_moves})")
+plt.axhline(avg_moves, color="blue", linestyle="--", label=f"Avg Moves ({avg_moves})")
 
-plt.tight_layout()
+plt.title("Training Progress")
+plt.xlabel("Game")
+plt.ylabel("Moves")
+plt.legend()
 plt.show()
 
 start = input("Do you want to play a game? [y/n]: ")
