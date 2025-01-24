@@ -88,6 +88,8 @@ class NimAI():
         self.gamma = gamma
         self.train_moves = []
         self.rewards = []
+        self.q_values_log = []
+        self.log_interval = 1000
 
     def update(self, old_state, action, new_state, reward):
         """
@@ -186,6 +188,12 @@ class NimAI():
         
         return random.choice(best_actions)
     
+    def log_q_values(self):
+        """
+        Log the current Q-values.
+        """
+        self.q_values_log.append(self.q.copy())
+
     def save(self, filename):
         """
         Save the whole object to a file using pickle.
@@ -266,6 +274,9 @@ def train(n, alpha=0.5, epsilon=0.1, gamma=1):
                     0
                 )
 
+        if (i + 1) % player.log_interval == 0:
+            player.log_q_values()
+
         print(f"Playing training game {i + 1}, moves: {moves}")
         player.train_moves.append(moves)
         player.rewards.append(game_rewards)
@@ -279,7 +290,7 @@ def train(n, alpha=0.5, epsilon=0.1, gamma=1):
     return player
 
 
-def play(ai, human_player=None):
+def play(ai: NimAI, human_player=None):
     """
     Play human game against the AI.
     `human_player` can be set to 0 or 1 to specify whether
@@ -333,3 +344,61 @@ def play(ai, human_player=None):
             winner = "Human" if game.winner == human_player else "AI"
             print(f"Winner is {winner}")
             return
+
+def aiPlay(baseline, ai, n, epsilon=False):
+    wins_as_baseline = 0
+    wins_as_ai = 0
+    debug = False
+
+    for i in range(n):
+        baseline_player = random.randint(0, 1)
+
+        # Create new game
+        game = Nim()
+
+        # Game loop
+        while True:
+            if debug:
+                # Print contents of piles
+                print()
+                print("Piles:")
+                for i, pile in enumerate(game.piles):
+                    print(f"Pile {i}: {pile}")
+                print()
+
+            # Let human make a move
+            if game.player == baseline_player:
+                if debug:
+                    print("Baseline AI's Turn")
+                pile, count = baseline.choose_action(game.piles, epsilon=epsilon)
+                if debug:
+                    print(f"AI chose to take {count} from pile {pile}.")
+            # Have AI make a move
+            else:
+                if debug:
+                    print("AI's Turn")
+                pile, count = ai.choose_action(game.piles, epsilon=epsilon)
+                if debug:
+                    print(f"AI chose to take {count} from pile {pile}.")
+
+            # Make move
+            game.move((pile, count))
+
+            # Check for winner
+            if game.winner is not None:
+                if debug:
+                    print()
+                    print("GAME OVER")
+                
+                if game.winner == baseline_player:
+                    wins_as_baseline += 1
+                    winner = "Baseline"
+                else:
+                    wins_as_ai += 1
+                    winner = "Trained AI"
+
+                if debug:
+                    print(f"Winner is {winner}")
+
+                break
+    return wins_as_baseline, wins_as_ai

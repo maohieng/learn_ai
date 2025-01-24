@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # If modelfile exists, loads the AI from the file
-modelfile = 'nim.pkl'
+modelfile = 'nim1.pkl'
 if os.path.exists(modelfile):
     ai = NimAI.load(modelfile)
 else:
