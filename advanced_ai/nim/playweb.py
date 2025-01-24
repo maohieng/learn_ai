@@ -34,8 +34,9 @@ def start_game():
         'current_player': 'Human' if game.player == human_player else 'AI',
         'move_history': move_history,
         'ai_info': {
-            'epsilon': ai.epsilon,
+            'exploration_rate': ai.epsilon,
             'learning_rate': ai.alpha,
+            'discount_factor': ai.gamma,
             'train_moves': len(ai.train_moves)
         }
     })

@@ -72,7 +72,7 @@ class Nim():
 
 class NimAI():
 
-    def __init__(self, alpha=0.5, epsilon=0.1):
+    def __init__(self, alpha=0.5, epsilon=0.1, gamma=1):
         """
         Initialize AI with an empty Q-learning dictionary,
         an alpha (learning) rate, and an epsilon rate.
@@ -85,7 +85,9 @@ class NimAI():
         self.q = dict()
         self.alpha = alpha
         self.epsilon = epsilon
+        self.gamma = gamma
         self.train_moves = []
+        self.rewards = []
 
     def update(self, old_state, action, new_state, reward):
         """
@@ -146,7 +148,8 @@ class NimAI():
 
         if max_q == float('-inf'):
             return 0
-        return max_q
+        
+        return self.gamma * max_q
 
     def choose_action(self, state, epsilon=True):
         """
@@ -199,18 +202,22 @@ class NimAI():
             return pickle.load(f)
             
 
-def train(n):
+def train(n, alpha=0.5, epsilon=0.1, gamma=1):
     """
     Train an AI by playing `n` games against itself.
     """
 
-    player = NimAI()
+    player = NimAI(alpha=alpha, epsilon=epsilon, gamma=gamma)
+    rewards_per_game = []  # List to record rewards per game
+    wins_as_player_0 = 0
+    wins_as_player_1 = 0
 
     # Play n games
     for i in range(n):
         game = Nim()
 
         moves = 0
+        game_rewards = 0  # Initialize game rewards
 
         # Keep track of last move made by either player
         last = {
@@ -243,6 +250,11 @@ def train(n):
                     new_state,
                     1
                 )
+                game_rewards += 1  # Update game rewards
+                if game.player == 0:
+                    wins_as_player_0 += 1
+                else:
+                    wins_as_player_1 += 1
                 break
 
             # If game is continuing, no rewards yet
@@ -256,8 +268,12 @@ def train(n):
 
         print(f"Playing training game {i + 1}, moves: {moves}")
         player.train_moves.append(moves)
+        player.rewards.append(game_rewards)
+        rewards_per_game.append(game_rewards)
 
     print("Done training")
+    print(f"AI won {wins_as_player_0 / n * 100:.2f}% of games as Player 0")
+    print(f"AI won {wins_as_player_1 / n * 100:.2f}% of games as Player 1")
 
     # Return the trained AI
     return player
