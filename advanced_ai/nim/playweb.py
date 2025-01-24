@@ -6,19 +6,19 @@ import os
 app = Flask(__name__)
 
 # If modelfile exists, loads the AI from the file
-modelfile = 'num.pkl'
+modelfile = 'nim.pkl'
 if os.path.exists(modelfile):
     ai = NimAI.load(modelfile)
 else:
     ai = train(10000)
     ai.save(modelfile)
 
-def display_piles(game: Nim) -> str:
-    """Return the current state of the piles as a string."""
-    piles_str = "Piles:\n"
-    for i, pile in enumerate(game.piles):
-        piles_str += f"Pile {i}: {pile}\n"
-    return piles_str
+# def display_piles(game: Nim) -> str:
+#     """Return the current state of the piles as a string."""
+#     piles_str = "Piles:\n"
+#     for i, pile in enumerate(game.piles):
+#         piles_str += f"Pile {i}: {pile}\n"
+#     return piles_str
 
 @app.route('/start', methods=['POST'])
 def start_game():
@@ -32,7 +32,12 @@ def start_game():
         'human_player': human_player,
         'piles': game.piles,
         'current_player': 'Human' if game.player == human_player else 'AI',
-        'move_history': move_history
+        'move_history': move_history,
+        'ai_info': {
+            'epsilon': ai.epsilon,
+            'learning_rate': ai.alpha,
+            'train_moves': len(ai.train_moves)
+        }
     })
 
 @app.route('/restart', methods=['POST'])

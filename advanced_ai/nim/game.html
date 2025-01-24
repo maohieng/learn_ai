@@ -30,18 +30,30 @@
         align-items: center;
         margin: 8px; /* Increase margin to make pile bigger */
         padding: 10px; /* Add padding for pile card */
-        border: 2px solid white; /* Add border for pile card */
-        border-radius: 10px; /* Add border radius for pile card */
+        /* border: 2px solid white; Add border for pile card */
+        /* border-radius: 10px; Add border radius for pile card */
         min-width: 50px; /* Set minimum width for pile card */
         min-height: 50px; /* Set minimum height for pile card */
       }
-      .ball {
-        width: 40px;
+      .matchstick {
+        width: 10px;
         height: 40px;
-        background-color: red;
-        border-radius: 50%;
+        background-color: burlywood;
+        border-radius: 2px;
         margin: 5px;
         cursor: pointer;
+        position: relative;
+      }
+      .matchstick::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10px;
+        height: 10px;
+        background-color: darkred;
+        border-radius: 50%;
       }
       .hidden {
         display: none;
@@ -59,13 +71,36 @@
         text-align: center;
       }
 
+      .title {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .main-screen {
+        display: flex;
+        flex-direction: row; /* Keep move-history on the right */
+        justify-content: center; /* Center the main content */
+        align-items: center; /* Center vertically */
+        width: 100%;
+        height: 100vh;
+      }
+
+      .content-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
       #move-history {
-        height: 300px;
+        height: 100%;
+        width: 300px; /* Set a fixed width for move-history */
         overflow-y: scroll;
         gap: 10px; /* Add gap between history cards */
         border-radius: 10px;
-        flex: 1;
-        border: 2px solid white; /* Add border for history container */
+        flex: none; /* Prevent flex-grow */
+        /* border: 2px solid white; Add border for history container */
         padding: 0 10px 10px 10px; /* Add padding for history container */
         -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
         scrollbar-width: none; /* Hide scrollbar for Firefox */
@@ -75,13 +110,14 @@
         display: none; /* Hide scrollbar for WebKit browsers */
       }
 
+      /* Place move-history to the right side */
       #move-history > div {
         flex-grow: 1;
         font-size: 16px;
-        padding: 0px; /* Add padding for history card */
-        border: 2px solid white; /* Add border for history card */
-        border-radius: 10px; /* Add border radius for history card */
-        margin-top: 10px;
+        padding: 8px; /* Add padding for history card */
+        /* border: 2px solid white; Add border for history card */
+        /* border-radius: 10px; Add border radius for history card */
+        margin-top: 12px;
         overflow: hidden;
       }
 
@@ -100,14 +136,6 @@
         background-color: gray; /* Change background color on hover */
       }
 
-      .main-screen {
-        width: 400px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-      }
-
       #start-screen,
       #game-screen,
       #end-screen {
@@ -121,60 +149,73 @@
         height: 80px;
       }
 
+      /* Move autor position to bottom left */
       .author {
-        position: fixed;
-        z-index: 9999;
-        bottom: 10px;
-        right: 10px;
+        bottom: 12px;
+        left: 12px;
         font-size: 12px;
         color: "white";
+        position: absolute;
       }
     </style>
   </head>
   <body>
     <div class="main-screen">
-      <div class="author">AUTHOR: <strong>VIN SAMDY</strong></div>
-      <div id="start-screen">
-        <button id="start-button">Start Game</button>
-      </div>
-      <div id="game-screen" class="hidden">
-        <div id="current-player"></div>
-        <div id="piles-container"></div>
-        <center class="confirm-container">
-          <button id="confirm-button" class="hidden">Confirm Move</button>
-        </center>
-        <div id="move-history"></div>
-      </div>
-      <div id="end-screen" class="hidden">
-        <p id="winner-message"></p>
-        <button id="restart-button">Start Over</button>
-      </div>
-    </div>
+      <div class="content-container">
+        <div class="author">@AUTHOR: <strong>Hieng MAO</strong></div>
+        <div class="title">
+          <h1>Nim Game</h1>
+          <p>Select matchsticks from a pile. The player who picks the last matchstick loses.</p>
+        </div>
 
+        <div id="start-screen">
+          <button id="start-button">Start Game</button>
+        </div>
+        <div id="game-screen" class="hidden">
+          <div id="current-player"></div>
+          <div id="piles-container"></div>
+          <center class="confirm-container">
+            <button id="confirm-button" class="hidden">Confirm Move</button>
+          </center>
+        </div>
+        <div id="end-screen" class="hidden">
+          <p id="winner-message"></p>
+          <button id="restart-button">Start Over</button>
+        </div>
+      </div>
+      <div id="move-history"></div>
+    </div>
     <script>
       let humanPlayer;
       let selectedPile = null;
       let selectedCount = 0;
+      let ai_info = null;
 
       document
-        .getElementById("start-button")
-        .addEventListener("click", startGame);
+      .getElementById("start-button")
+      .addEventListener("click", startGame);
       document
-        .getElementById("confirm-button")
-        .addEventListener("click", confirmMove);
+      .getElementById("confirm-button")
+      .addEventListener("click", confirmMove);
       document
-        .getElementById("restart-button")
-        .addEventListener("click", restartGame);
+      .getElementById("restart-button")
+      .addEventListener("click", restartGame);
 
       function startGame() {
-        console.log("Starting game...");
-        fetch("/start", {
+      console.log("Starting game...");
+      fetch("/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ human_player: Math.floor(Math.random() * 2) }),
-        })
+      })
           .then((response) => response.json())
           .then((data) => {
+            ai_info = JSON.stringify(data.ai_info);
+            var ai = document.createElement("div");
+            ai.className = "ai_nfo";
+            ai.textContent = `AI: ${ai_info}`;
+            document.getElementsByClassName("title")[0].appendChild(ai);
+
             console.log("Game started:", data);
             humanPlayer = data.human_player;
             displayPiles(data.piles);
@@ -184,195 +225,197 @@
             selectedPile = null; // Reset selectedPile
             selectedCount = 0; // Reset selectedCount
             document.getElementById(
-              "current-player"
-            ).textContent = `Current Player: ${data.current_player}`;
+                "current-player"
+            ).textContent = `Play move: ${data.current_player}`;
             updateMoveHistory(data.move_history);
             if (data.current_player === "AI") {
-              disableUserSelection();
-              setTimeout(aiMove, 2000); // Delay AI move by 2 seconds
+                disableUserSelection();
+                setTimeout(aiMove, 2000); // Delay AI move by 2 seconds
             } else {
-              enableUserSelection();
+                enableUserSelection();
             }
           })
           .catch((error) => console.error("Error starting game:", error));
       }
 
       function displayPiles(piles) {
-        console.log("Displaying piles:", piles);
-        const container = document.getElementById("piles-container");
-        container.innerHTML = "";
-        piles.forEach((pile, index) => {
+      console.log("Displaying piles:", piles);
+      const container = document.getElementById("piles-container");
+      container.innerHTML = "";
+      piles.forEach((pile, index) => {
           const pileDiv = document.createElement("div");
           pileDiv.className = "pile";
           pileDiv.dataset.index = index;
           for (let i = 0; i < pile; i++) {
-            const ball = document.createElement("div");
-            ball.className = "ball";
-            ball.addEventListener("click", () => selectBall(index, i));
-            pileDiv.appendChild(ball);
+          const matchstick = document.createElement("div");
+          matchstick.className = "matchstick";
+          matchstick.addEventListener("click", () => selectMatchstick(index, i));
+          pileDiv.appendChild(matchstick);
           }
           container.appendChild(pileDiv);
-        });
+      });
       }
 
-      function selectBall(pileIndex, ballIndex) {
-        console.log(`Selecting ball: pile ${pileIndex}, ball ${ballIndex}`);
-        const ball = document.querySelector(
-          `.pile[data-index="${pileIndex}"] .ball:nth-child(${ballIndex + 1})`
+      function selectMatchstick(pileIndex, matchstickIndex) {
+        console.log(`Selecting matchstick: pile ${pileIndex}, matchstick ${matchstickIndex}`);
+        const matchstick = document.querySelector(
+            `.pile[data-index="${pileIndex}"] .matchstick:nth-child(${matchstickIndex + 1})`
         );
-        if (ball.style.backgroundColor === "green") {
-          ball.style.backgroundColor = "red";
-          selectedCount--;
-          if (selectedCount === 0) {
+        if (matchstick.style.backgroundColor === "green") {
+            matchstick.style.backgroundColor = "burlywood";
+            selectedCount--;
+            if (selectedCount === 0) {
             selectedPile = null;
             document.getElementById("confirm-button").classList.add("hidden");
-          }
+            }
         } else {
-          if (selectedPile === null || selectedPile === pileIndex) {
+            if (selectedPile === null || selectedPile === pileIndex) {
             selectedPile = pileIndex;
             selectedCount++;
-            ball.style.backgroundColor = "green";
+            matchstick.style.backgroundColor = "green";
             document
-              .getElementById("confirm-button")
-              .classList.remove("hidden");
-          }
+                .getElementById("confirm-button")
+                .classList.remove("hidden");
+            }
         }
       }
 
       function confirmMove() {
-        console.log(
+      console.log(
           `Confirming move: pile ${selectedPile}, count ${selectedCount}`
-        );
-        fetch("/human_move", {
+      );
+      fetch("/human_move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ pile: selectedPile, count: selectedCount }),
-        })
+      })
           .then((response) => response.json())
           .then((data) => {
-            console.log("Move confirmed:", data);
-            if (data.message === "GAME OVER") {
+          console.log("Move confirmed:", data);
+          if (data.message === "GAME OVER") {
               document.getElementById(
-                "winner-message"
+              "winner-message"
               ).textContent = `Winner: ${data.winner}`;
               document.getElementById("game-screen").classList.add("hidden");
               document.getElementById("end-screen").classList.remove("hidden");
-            } else {
+          } else {
               displayPiles(data.piles);
               document.getElementById("confirm-button").classList.add("hidden");
               selectedPile = null;
               selectedCount = 0; // Reset selectedCount after move
               document.getElementById(
-                "current-player"
-              ).textContent = `Current Player: ${data.current_player}`;
+              "current-player"
+              ).textContent = `Player move: ${data.current_player}`;
               updateMoveHistory(data.move_history);
               if (data.next_player === "AI") {
-                disableUserSelection();
-                setTimeout(aiMove, 2000); // Delay AI move by 2 seconds
+              disableUserSelection();
+              setTimeout(aiMove, 2000); // Delay AI move by 2 seconds
               } else {
-                enableUserSelection();
+              enableUserSelection();
               }
-            }
+          }
           })
           .catch((error) => console.error("Error confirming move:", error));
       }
 
       function aiMove() {
-        console.log("AI making move...");
-        document.getElementById("current-player").textContent =
-          "Current Player: AI"; // Update current player display
-        fetch("/ai_move", {
+      console.log("AI making move...");
+      document.getElementById("current-player").textContent =
+          "Player move: AI"; // Update player move display
+      fetch("/ai_move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-        })
+      })
           .then((response) => response.json())
           .then((data) => {
-            console.log("AI move confirmed:", data);
-            if (data.message === "GAME OVER") {
+          console.log("AI move confirmed:", data);
+          if (data.message === "GAME OVER") {
               document.getElementById(
-                "winner-message"
+              "winner-message"
               ).textContent = `Winner: ${data.winner}`;
               document.getElementById("game-screen").classList.add("hidden");
               document.getElementById("end-screen").classList.remove("hidden");
-            } else {
+          } else {
               displayPiles(data.piles);
               document.getElementById(
-                "current-player"
-              ).textContent = `Current Player: ${data.current_player}`;
+              "current-player"
+              ).textContent = `Player move: ${data.current_player}`;
               updateMoveHistory(data.move_history);
               enableUserSelection();
-            }
+          }
           })
           .catch((error) => console.error("Error with AI move:", error));
       }
 
       function restartGame() {
-        console.log("Restarting game...");
-        fetch("/restart", {
+      console.log("Restarting game...");
+      fetch("/restart", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ human_player: Math.floor(Math.random() * 2) }),
-        })
+      })
           .then((response) => response.json())
           .then((data) => {
-            console.log("Game restarted:", data);
-            humanPlayer = data.human_player;
-            displayPiles(data.piles);
-            document.getElementById("end-screen").classList.add("hidden");
-            document.getElementById("game-screen").classList.remove("hidden");
-            document.getElementById("confirm-button").classList.add("hidden"); // Ensure confirm button is hidden
-            selectedPile = null; // Reset selectedPile
-            selectedCount = 0; // Reset selectedCount
-            document.getElementById(
+          console.log("Game restarted:", data);
+          humanPlayer = data.human_player;
+          displayPiles(data.piles);
+          document.getElementById("end-screen").classList.add("hidden");
+          document.getElementById("game-screen").classList.remove("hidden");
+          document.getElementById("confirm-button").classList.add("hidden"); // Ensure confirm button is hidden
+          selectedPile = null; // Reset selectedPile
+          selectedCount = 0; // Reset selectedCount
+          document.getElementById(
               "current-player"
-            ).textContent = `Current Player: ${data.current_player}`;
-            updateMoveHistory(data.move_history);
-            if (data.current_player === "AI") {
+          ).textContent = `Player move: ${data.current_player}`;
+          updateMoveHistory(data.move_history);
+          if (data.current_player === "AI") {
               disableUserSelection();
               setTimeout(aiMove, 2000); // Delay AI move by 2 seconds
-            } else {
+          } else {
               enableUserSelection();
-            }
+          }
           })
           .catch((error) => console.error("Error restarting game:", error));
       }
 
       function disableUserSelection() {
-        document.getElementById("piles-container").style.pointerEvents = "none";
+      document.getElementById("piles-container").style.pointerEvents = "none";
       }
 
       function enableUserSelection() {
-        document.getElementById("piles-container").style.pointerEvents = "auto";
+      document.getElementById("piles-container").style.pointerEvents = "auto";
       }
 
       function updateMoveHistory(moveHistory) {
-        const moveHistoryDiv = document.getElementById("move-history");
-        moveHistoryDiv.innerHTML = "";
-        moveHistory
+      const moveHistoryDiv = document.getElementById("move-history");
+      moveHistoryDiv.innerHTML = "";
+      moveHistory
           .slice()
           .reverse()
           .forEach((move, index) => {
-            const moveEntry = document.createElement("div");
-            moveEntry.style.display = "flex";
-            moveEntry.style.justifyContent = "space-between";
-            const indexLabel = document.createElement("span");
-            indexLabel.textContent = `${moveHistory.length - index}`;
-            indexLabel.style.fontWeight = "bold";
-            indexLabel.style.height = "100%";
-            indexLabel.style.width = "28px";
-            indexLabel.style.padding = "8px";
-            indexLabel.style.color = "white";
-            indexLabel.style.backgroundColor =
+          const moveEntry = document.createElement("div");
+          moveEntry.style.display = "flex";
+          moveEntry.style.justifyContent = "space-between";
+          const indexLabel = document.createElement("span");
+          indexLabel.textContent = `${moveHistory.length - index}`;
+          indexLabel.style.fontWeight = "bold";
+          indexLabel.style.height = "100%";
+          indexLabel.style.width = "28px";
+          indexLabel.style.padding = "4px";
+          indexLabel.style.marginRight = "8px";
+          indexLabel.style.textAlign = "center";
+          indexLabel.style.color = "white";
+          indexLabel.style.backgroundColor =
               move.player === "AI" ? "red" : "green";
-            const moveText = document.createElement("span");
-            moveText.textContent = `${move.player} picked ${move.count} from pile ${move.pile}`;
-            moveEntry.appendChild(indexLabel);
-            moveEntry.appendChild(moveText);
-            moveHistoryDiv.appendChild(moveEntry);
-            moveText.style.flexGrow = 1;
-            moveText.style.textAlign = "left";
-            moveText.style.height = "100%";
-            moveText.style.padding = "8px";
+          const moveText = document.createElement("span");
+          moveText.textContent = `${move.player} picked ${move.count} from pile ${move.pile}`;
+          moveEntry.appendChild(indexLabel);
+          moveEntry.appendChild(moveText);
+          moveHistoryDiv.appendChild(moveEntry);
+          moveText.style.flexGrow = 1;
+          moveText.style.textAlign = "left";
+          moveText.style.height = "100%";
+          moveText.style.padding = "8px";
           });
       }
     </script>
