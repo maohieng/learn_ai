@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # If modelfile exists, loads the AI from the file
-modelfile = 'nim1.pkl'
+modelfile = 'nim4.pkl'
 if os.path.exists(modelfile):
     ai = NimAI.load(modelfile)
 else:
@@ -37,7 +37,8 @@ def start_game():
             'exploration_rate': ai.epsilon,
             'learning_rate': ai.alpha,
             'discount_factor': ai.gamma,
-            'train_moves': len(ai.train_moves)
+            'train_moves': len(ai.train_moves),
+            'name': modelfile
         }
     })
 
@@ -81,7 +82,7 @@ def human_move():
 
     # Trigger AI move if it's AI's turn
     if game.player != human_player:
-        pile, count = ai.choose_action(game.piles, epsilon=False)
+        pile, count = ai.choose_action(game.piles)
         game.move((pile, count))
         move_history.append({'player': 'AI', 'pile': pile, 'count': count})
         if game.winner is not None:
@@ -108,7 +109,7 @@ def ai_move():
     if game.player == human_player:
         return jsonify({'message': 'Not AI turn'}), 400
 
-    pile, count = ai.choose_action(game.piles, epsilon=False)
+    pile, count = ai.choose_action(game.piles)
     game.move((pile, count))  # Fix the order of pile and count
     move_history.append({'player': 'AI', 'pile': pile, 'count': count})
     if game.winner is not None:

@@ -210,7 +210,7 @@ class NimAI():
             return pickle.load(f)
             
 
-def train(n, alpha=0.5, epsilon=0.1, gamma=1):
+def train(n, alpha=0.5, gamma=1, epsilon=0.1):
     """
     Train an AI by playing `n` games against itself.
     """
