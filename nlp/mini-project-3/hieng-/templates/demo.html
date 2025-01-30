@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Generation Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Koh+Santepheap&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #cbd5e0;
+            font-family: 'Koh Santepheap', sans-serif;
+        }
+        .bg-white {
+            background-color: #2d3748;
+            border-radius: 1.5rem; /* Further increased border-radius */
+        }
+        .text-gray-700 {
+            color: #a0aec0;
+        }
+        .border-gray-300 {
+            border-color: #4a5568;
+        }
+        .bg-gray-100 {
+            background-color: #4a5568;
+            border-radius: 1rem; /* Further increased border-radius */
+        }
+        .bg-gray-200 {
+            background-color: #2d3748;
+            border-radius: 1rem; /* Further increased border-radius */
+        }
+        .bg-blue-500 {
+            background-color: #4299e1;
+            border-radius: 1rem; /* Further increased border-radius */
+        }
+        .bg-gray-500 {
+            background-color: #718096;
+            border-radius: 1rem; /* Further increased border-radius */
+        }
+        .rounded {
+            border-radius: 1rem; /* Further increased border-radius */
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        .typing {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid;
+            animation: typing 3s steps(40, end), blink-caret .75s step-end infinite;
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #cbd5e0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded shadow">
+        <h1 class="text-2xl font-bold mb-4">Text Generation Demo</h1>
+        <form id="generate-form" class="mb-4">
+            <div class="mb-4">
+                <label for="seed" class="block text-gray-700">Seed Sentence:</label>
+                <input type="text" id="seed" name="seed" required class="w-full p-2 border border-gray-300 rounded" value="ប្រាសាទអង្គរវត្តត្រូវបានគេចាត់">
+            </div>
+            <div class="flex flex-row items-center mb-4 gap-4">
+                <div class="flex-1">
+                    <div class="flex flex-row items-center justify-between">
+                        <label for="n_words" class="block text-gray-700">Number of generate words:</label>
+                        <span id="n_words_value" class="block text-gray-700 mt-2">100</span>
+                    </div>
+                    <input type="range" id="n_words" name="n_words" min="1" max="100" value="100" required class="w-full">
+                </div>
+                <div class="flex-3">
+                    <label for="model" class="block text-gray-700">Select Model:</label>
+                    <select id="model" name="model" required class="w-full p-2 border border-gray-300 rounded text-gray-800">
+                        <option value="skip1">Skip-gram Embedding</option>
+                        <option value="skip2">LSTM Skip-gram Embedding</option>
+                        <option value="scratch1">Scratch Embedding</option>
+                        <option value="scratch2">LSTM Scratch Embedding</option>
+                        <option value="extended1">Extended Skip-gram Embedding</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded" id="generate-button">Generate</button>
+        </form>
+        <h2 class="text-xl font-semibold mb-2">Generated Text:</h2>
+        <p id="generated-text" class="p-4 bg-gray-100 border border-gray-300 rounded"></p>
+    </div>
+
+    <script>
+        document.getElementById('n_words').addEventListener('input', (event) => {
+            document.getElementById('n_words_value').innerText = event.target.value;
+        });
+
+        document.getElementById('generate-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            document.getElementById('generate-button').innerText = 'Generating...';
+            document.getElementById('generate-button').classList.remove('bg-blue-500');
+            document.getElementById('generate-button').classList.add('bg-gray-500');
+            document.getElementById('generate-button').classList.add('cursor-progress')
+            document.getElementById('generate-button').classList.add('pointer-events-none')
+
+            const seed = document.getElementById('seed').value;
+            const n_words = document.getElementById('n_words').value;
+            const model = document.getElementById('model').value;
+            const loading = document.getElementById('loading');
+
+            let sentence = seed;
+            const generatedTextElement = document.getElementById('generated-text');
+            generatedTextElement.innerText = seed;
+
+            for (let i = 0; i < n_words; i++) {
+                const response = await fetch(`/predict/${model}/${sentence}`);
+                const data = await response.json();
+                const nextWord = data;
+
+                sentence += nextWord;
+                generatedTextElement.innerText += nextWord;
+            }
+
+            document.getElementById('generate-button').classList.remove('bg-gray-500');
+            document.getElementById('generate-button').innerText = 'Generate';
+            document.getElementById('generate-button').classList.remove('cursor-progress');
+            document.getElementById('generate-button').classList.remove('pointer-events-none')
+            document.getElementById('generate-button').classList.add('bg-blue-500');
+        });
+    </script>
+</body>
+</html>

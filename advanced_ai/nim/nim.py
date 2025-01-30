@@ -345,7 +345,7 @@ def play(ai: NimAI, human_player=None):
             print(f"Winner is {winner}")
             return
 
-def aiPlay(baseline, ai, n, epsilon=False):
+def aiPlay(baseline:NimAI, ai:NimAI, n:int, epsilon=False):
     wins_as_baseline = 0
     wins_as_ai = 0
     debug = False
