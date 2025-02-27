@@ -47,4 +47,4 @@ def similarity(word, reduced_embeddings):
         similarities[w] = score
 
     sorted_similarities = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-    sorted_similarities[:10]
+    return sorted_similarities[:10]

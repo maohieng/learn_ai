@@ -7,9 +7,20 @@ NEGATIVE_SAMPLES = 2
 N = 5
 H = 512
 
-UNKNOWN_TOKEN = "<ចម>"
+def word_indexing(file_word_indexing):
+    '''
+    Loads word to index from file and returns word_to_index, index_to_word, and vocabs.
+    '''
+    word_to_index = np.load(file_word_indexing, allow_pickle=True).item()
+    index_to_word = {v: k for k, v in word_to_index.items()}
+    vocabs = word_to_index.keys()
+    return word_to_index, index_to_word, vocabs
 
 def create_embedding_array(words_embedding, word_to_index):
+    '''
+    Create an array of array 50-dimensional with zeros and fill the array with the embeddings.
+    This make sure that the index of embeddings are corresponding to the index of the word in the word_to_index.
+    '''
     # Create an array of array 50-dimensional with zeros
     embeddings_array = np.zeros((len(words_embedding), EMBEDDING_DIM))
 
@@ -29,7 +40,7 @@ def map_embbedings_to_word(embbedings, word_to_index):
         word_to_embbedings[word] = embbedings[index]
     return word_to_embbedings
 
-def predict_next_word(model, sentence, word_to_index, index_to_word, vocabs):
+def predict_next_word(model, sentence, word_to_index, index_to_word, vocabs, unk_token = "<UNK>"):
     _tokens = word_tokenize(sentence)
     if len(_tokens) < N:
         raise ValueError(f"Expected {N} words, got {len(_tokens)}")
@@ -38,7 +49,9 @@ def predict_next_word(model, sentence, word_to_index, index_to_word, vocabs):
     # Take the last N words
     _tokens = _tokens[-N:]
 
-    x = np.array([[word_to_index[w] if w in vocabs else word_to_index[UNKNOWN_TOKEN] for w in _tokens]])
+    unk_index = word_to_index[unk_token]
+    
+    x = np.array([[word_to_index[w] if w in vocabs else unk_index for w in _tokens]])
     y = model.predict(x)
 
     # Get 5 words with the highest probability
@@ -48,7 +61,7 @@ def predict_next_word(model, sentence, word_to_index, index_to_word, vocabs):
     top_words = [index_to_word[i] for i in top_indices]
 
     for w in top_words:
-        if w not in last_2_words and w != UNKNOWN_TOKEN:
+        if w not in last_2_words and w != unk_token:
             return w
     
     return top_words[-1]
