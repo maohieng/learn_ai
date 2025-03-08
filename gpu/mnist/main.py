@@ -10,8 +10,9 @@ import pandas as pd
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, disable_dropout=False):
         super(Net, self).__init__()
+        self.disable_dropout = disable_dropout
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
         self.dropout1 = nn.Dropout2d(0.25)
@@ -25,11 +26,13 @@ class Net(nn.Module):
         x = self.conv2(x)
         x = F.relu(x)
         x = F.max_pool2d(x, 2)
-        x = self.dropout1(x)
+        if not self.disable_dropout:
+            x = self.dropout1(x)
         x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = F.relu(x)
-        x = self.dropout2(x)
+        if not self.disable_dropout:
+            x = self.dropout2(x)
         x = self.fc2(x)
         output = F.log_softmax(x, dim=1)
         return output
@@ -100,11 +103,22 @@ def main():
     parser.add_argument('--save-model', action='store_true', default=False,
                         help='For Saving the current Model')
     parser.add_argument('--read-only', action='store_true', default=False,
-                        help='For Saving the current Model')
+                        help='For reading losses and plot')
+    parser.add_argument('--reverse-data', action='store_true', default=False,
+                        help='For data reversing train for test and test for train')
+    parser.add_argument('--disable-dropout', action='store_true', default=False,
+                        help='To disable dropout layers in the model.')
+
     args = parser.parse_args()
 
     # prepare base filename
     suffix_filename = f'{args.epochs}_{args.batch_size}_{args.lr}_{args.gamma}'
+    if args.disable_dropout:
+        suffix_filename += '_dropout_disabled'
+    
+    if args.reverse_data:
+        suffix_filename += '_reverse_data'
+
     if args.read_only:
         plot_losses(suffix_filename)
         return
@@ -130,7 +144,7 @@ def main():
                        ])),
         batch_size=args.test_batch_size, shuffle=True, **kwargs)
 
-    model = Net().to(device)
+    model = Net(args.disable_dropout).to(device)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
@@ -138,6 +152,9 @@ def main():
     train_losses = []
     test_losses = []
 
+    if args.reverse_data:
+        train_loader, test_loader = test_loader, train_loader
+    
     for epoch in range(1, args.epochs + 1):
         tl = train(args, model, device, train_loader, optimizer, epoch)
         train_losses.append(tl)
@@ -170,7 +187,7 @@ def plot_losses(suffix_filename):
     plt.ylabel('Loss')
     plt.title('Train and Test Losses')
     plt.savefig(f'exports/losses_{suffix_filename}.png')
-    plt.show()
+    # plt.show()
 
 if __name__ == '__main__':
     main()

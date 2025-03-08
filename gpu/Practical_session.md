@@ -110,6 +110,19 @@ In summary, using Adadelta optimizer helps in automatically adjusting the learni
 1. Modify the `train` and `test` function
 Since we just want the average loss per epoch, we modify the `train` and `test` function to returns their total losses divided by total training and testing dataset respectively for `train` and `test` function. Therefor, we store all average losses of training and testing in a list corresponding to the epoches (`args.epoches`). 
 
-In order to keep tracking the working history and to effeciently plot the graph, these losses are saved to a csv file in an `exports` folder. 
+In order to keep tracking the working history and to effeciently plot the graph, these losses are saved to a csv file in an `exports` folder. We experiment the network on **NVIDIA A40**.
 
-For the sake of simplicity, we run `14` epoches and learning rate of `1.1` through out these experiments. 
+For the sake of simplicity, we run 
+
+**Experiment 1: Normal**:
+Test set: Average loss: 0.0450, Accuracy: 9844/10000 (98%)
+
+**Experiment 2: Reversed data**:
+Test set: Average loss: 0.1670, Accuracy: 56966/60000 (95%)
+
+**Experiment 3: Reversed data + No Dropout layers**
+Test set: Average loss: 0.1771, Accuracy: 56823/60000 (95%)
+
+**Experiment 4: No Dropout layers**
+Test set: Average loss: 0.0286, Accuracy: 9918/10000 (99%)
+ 
