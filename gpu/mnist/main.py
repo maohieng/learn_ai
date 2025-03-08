@@ -120,7 +120,7 @@ def main():
         suffix_filename += '_reverse_data'
 
     if args.read_only:
-        plot_losses(suffix_filename)
+        plot_losses(suffix_filename, args.disable_dropout, args.reverse_data)
         return
 
     use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -174,9 +174,15 @@ def main():
     if args.save_model:
         torch.save(model.state_dict(), f"exports/mnist_cnn_{suffix_filename}.pt")
 
-def plot_losses(suffix_filename):
+def plot_losses(suffix_filename, disable_dropout = False, reverse_data = False):
     import matplotlib.pyplot as plt
     import pandas as pd
+
+    title = 'Train and Test Losses'
+    if disable_dropout:
+        title += ' (Dropout Disabled)'
+    if reverse_data:
+        title += ' (Reverse Data)'
 
     # Plot 2 losses graph with epoch as legend
     losses = pd.read_csv(f'exports/losses_{suffix_filename}.csv')
@@ -185,7 +191,7 @@ def plot_losses(suffix_filename):
     plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Train and Test Losses')
+    plt.title(title)
     plt.savefig(f'exports/losses_{suffix_filename}.png')
     # plt.show()
 
