@@ -110,19 +110,68 @@ In summary, using Adadelta optimizer helps in automatically adjusting the learni
 1. Modify the `train` and `test` function
 Since we just want the average loss per epoch, we modify the `train` and `test` function to returns their total losses divided by total training and testing dataset respectively for `train` and `test` function. Therefor, we store all average losses of training and testing in a list corresponding to the epoches (`args.epoches`). 
 
-In order to keep tracking the working history and to effeciently plot the graph, these losses are saved to a csv file in an `exports` folder. We experiment the network on **NVIDIA A40**.
+In order to keep tracking the working history and to effeciently plot the graph, these losses are saved to a csv file in an `exports` folder.
 
-For the sake of simplicity, we run 
+Before we deep dive into the experiments below. Let us have a look at the dataset splitted for training and testing. Since both training and testing dataset use `DataLoader` to load data separatedly from pytorch's mnist API, the total of training data is **60,000** while the total of testing data is **1,000**. We use the training batch size of **64** while keeping the default testing batch size of **1,000**.  
 
-**Experiment 1: Normal**:
-Test set: Average loss: 0.0450, Accuracy: 9844/10000 (98%)
+2. **Experiment 1: Normal experiement**:
+This experiment uses training set for trainging and testing set for testing and keep enabling the dropout layers. [Figure 1](#) is a Losses graph of this experiment.
 
-**Experiment 2: Reversed data**:
-Test set: Average loss: 0.1670, Accuracy: 56966/60000 (95%)
+![Losses Graph 1](mnist/exports/losses_14_64_1.0_0.7.png "Losses Graph 1")
+*Figure 1: Losses Graph for Experiement 1: Normal.*
 
-**Experiment 3: Reversed data + No Dropout layers**
-Test set: Average loss: 0.1771, Accuracy: 56823/60000 (95%)
+According to this graph, the network learns from data very well starting from epoch 2 and going slicely decreasing.
 
-**Experiment 4: No Dropout layers**
-Test set: Average loss: 0.0286, Accuracy: 9918/10000 (99%)
+Even the testing graph contains up and down trend, but its global form towards descreasing which indicate that the network is not overffiting and is generalize for unseen data. So the model perform very well in this experiment.
+
+Overal result from the test set, average loss is **0.0450** and its accuracy is **9844/10000 (98%)**.
+
+3. **Experiment 2: Reversed data**:
+This experiment, we reverse the training set for testing and the testing set for training but still keep enabling the dropout layers. [Figure 2](#) shows the Losses of this experiment.
+
+![Losses Graph 2](mnist/exports/losses_14_64_1.0_0.7_reverse_data.png "Losses Graph 2")
+*Figure 2: Losses Graph for Experiment 2: Reverse Data.*
+
+In this experiment, the model learns from only **1,000** images but tested on **60,000** unseen images, it still performs as well as the first experiment (95%). The model learns very well since the beginning of the train (converge since the epoch 1). 
+
+According to the testing graph, the model is still not overfitting since we use dropout layers during learning the data. 
+
+Overal result from the test set, average loss is **0.1670** and accuracy is **56966/60000 (95%)**.
+
+So base on these 2 experiments, using dropout layers is very powerful to avoid the model overfitting and let the model learns very well on the appropriate number of dataset. 
+
+4. **Experiment 3: Reversed data + No Dropout layers**
+This experiment, we keep reversing the training and testing dataset and we disable the dropout layers in the network for training. [Figure 3](#) shows the Losses of this experiment.
+
+![Losses Graph 3](mnist/exports/losses_14_64_1.0_0.7_dropout_disabled_reverse_data.png "Losses Graph 3")
+*Figure 3: Losses Graph for Experiment 3: Reverse Data + No Dropout Layers.*
+
+The model is trained only on the 1,000 dataset and is tested against 60,000 dataset with the dropout layers disabled,  we still receive the same result as the [Experiment 2](#) above with the overal result, test set got average loss of **0.1771** and accuracy of **56823/60000 (95%)** (sliccely different from the Experiment 2). 
+
+According to the testing graph, the model is still not overfitting and towards generalized even recieve the result as not good as our first experiment. 
+
+5. **Experiment 4: No Dropout layers**
+This experiment use training set for training and testing set for testing while removing/disabling the dropout layers for training.
+
+![Losses Graph 4](mnist/exports/losses_14_64_1.0_0.7_dropout_disabled.png "Losses Graph 4")
+*Figure 4: Losses Graph for Experiment 4: No Dropout Layers.*
+
+The same as the [Experiment 1](#), the model learns very well. It converges at the second epoch and slicely decreasing the training losses.
+
+The overal result on test set, the average loss is **0.0286** and the accuracy of **9918/10000 (99%)** which indicates the best accurracy among these experiments.
+
+Eventhough the testing on training dataset received the best result, the testing on unseen dataset of 1,000 images, without dropout layers, the testing losses is **increasingly** which indicates that the model is **overfitting**. This mean that the model learns very well on the training dataset but unable to perform well on the unseen data, which leads to not generalized.
+
+We can conclude that this model design is very suitable for this tasks of regconition the handwriting number from [mnist dataset](http://yann.lecun.com/exdb/mnist/). Even less data for testing, the model learns very fast and performs very well on the unseen dataset. Keep in mind of using dropout layers, which is a very powerful technique for avoiding the model overfitting.
  
+6. Merge for training losses and testing losses graphs
+
+![All Train Losses](mnist/exports/losses_14_64_1.0_0.7_merged_train.png "All Train Losses")
+*Figure 5: All Trains Losses Graph*
+
+![All Test Losses](mnist/exports/losses_14_64_1.0_0.7_merged_test.png "All Test Losses")
+*Figure 5: All Tests Losses Graph*
+
+By combining the graphs, we can better observe the "overfitting" on the case of **Disable Dropout layers**. We can see that on the training graph ([Figure 5](#)), the learning losses of "Disable Dropout" have the best learning curve among other experiments. It indicates that the model / network learns very good on the seen data. On the other hand, the testing losses curve of "Disable Dropout" tends to increase in its global form. This indicates that the model infers very bad on the unseen data which leads to not generalize, therefore, "overfitting".
+
+### Exercise 4: Parameter Variations
