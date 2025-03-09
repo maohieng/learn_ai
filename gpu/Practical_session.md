@@ -175,3 +175,14 @@ We can conclude that this model design is very suitable for this tasks of regcon
 By combining the graphs, we can better observe the "overfitting" on the case of **Disable Dropout layers**. We can see that on the training graph ([Figure 5](#)), the learning losses of "Disable Dropout" have the best learning curve among other experiments. It indicates that the model / network learns very good on the seen data. On the other hand, the testing losses curve of "Disable Dropout" tends to increase in its global form. This indicates that the model infers very bad on the unseen data which leads to not generalize, therefore, "overfitting".
 
 ### Exercise 4: Parameter Variations
+Please find several experiments on each parameter as in [parameter_variation.xlsx](mnist/parameter_variations.xlsx).
+
+In this experiment, I found out that the training's batch size data affects to the model performance. The more training batch size we provided, the more generalize model. We experimented the training batch size of **64, 256, 1000, and 2048**. 
+
+For batch size of 64 and 256, we hav discussed that the model of **Disable Dropout layers** is overfitting. But for 1000 of batch size, the model of **Normal/Default** experiment became overfitting while Disable Dropout model not. For batch size of 2048, the 4 experiments models are no more overffiting.
+
+So the surprising result is **the number of batch size affects the model performance. The higher batch size makes the model more generalized.**. How high the batch size we take depends on how much RAM of the training computer has.
+
+We can further discuss the difference of the model performance on CPU and GPU by keeping our batch size of **2048**. By analysis on the merged graphs of training and testing losses for CPU and GPU training, there is different result regarding these trainings. The different is the time consumtion on CPU training which took longer to train compare to GPU training.
+
+### Exercise 5: Performance Comparasion with ML alternative
