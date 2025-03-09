@@ -1,7 +1,7 @@
 from __future__ import print_function
 import argparse
-import pandas as pd
-
+import torch
+from main import get_export_dir, get_suffix_filename
 
 def main():
     # Training settings
@@ -34,31 +34,36 @@ def main():
 
     args = parser.parse_args()
 
-    # prepare base filename
-    suffix_filename = f'{args.epochs}_{args.batch_size}_{args.lr}_{args.gamma}'
-    
-    plot_all_losses(suffix_filename)
+    use_cuda = not args.no_cuda and torch.cuda.is_available()
+    dv = "cuda" if use_cuda else "cpu"
+    print(f"Using {dv} device")
 
-def plot_all_losses(suffix_filename):
+    # prepare base filename
+    suffix_filename = get_suffix_filename(args, dv)
+    exp_dir = get_export_dir(args)
+    
+    plot_all_losses(exp_dir, suffix_filename)
+
+def plot_all_losses(exp_dir, suffix_filename):
     import matplotlib.pyplot as plt
     import pandas as pd
 
     title = 'Train Losses'
 
     # Plot 2 losses graph with epoch as legend
-    losses1_file = f"exports/losses_{suffix_filename}.csv"
+    losses1_file = f"{exp_dir}/losses_{suffix_filename}.csv"
     print(f'Loading {losses1_file}')
     losses1 = pd.read_csv(losses1_file)
     
-    losses2_file = f'exports/losses_{suffix_filename}_reverse_data.csv'
+    losses2_file = f'{exp_dir}/losses_{suffix_filename}_reverse_data.csv'
     print(f'Loading {losses2_file}')
     losses2 = pd.read_csv(losses2_file)
 
-    losses3_file = f'exports/losses_{suffix_filename}_dropout_disabled.csv'
+    losses3_file = f'{exp_dir}/losses_{suffix_filename}_dropout_disabled.csv'
     print(f'Loading {losses3_file}')
     losses3 = pd.read_csv(losses3_file)
 
-    losses4_file = f'exports/losses_{suffix_filename}_dropout_disabled_reverse_data.csv'
+    losses4_file = f'{exp_dir}/losses_{suffix_filename}_dropout_disabled_reverse_data.csv'
     print(f'Loading {losses4_file}')
     losses4 = pd.read_csv(losses4_file)
 
@@ -77,7 +82,7 @@ def plot_all_losses(suffix_filename):
     plt.xlabel('Epoch')
     plt.ylabel('Train Loss')
     plt.title(title)
-    img_file = f'exports/losses_{suffix_filename}_merged_train.png'
+    img_file = f'{exp_dir}/losses_{suffix_filename}_merged_train.png'
     print(f'Saving {img_file}')
     plt.savefig(img_file)
     # plt.show()
@@ -98,7 +103,7 @@ def plot_all_losses(suffix_filename):
     plt.xlabel('Epoch')
     plt.ylabel('Test Loss')
     plt.title(title)
-    img_file = f'exports/losses_{suffix_filename}_merged_test.png'
+    img_file = f'{exp_dir}/losses_{suffix_filename}_merged_test.png'
     print(f'Saving {img_file}')
     plt.savefig(img_file)
     # plt.show()

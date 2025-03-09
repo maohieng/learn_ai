@@ -20,6 +20,5 @@ __pycache__
 *.wav
 *.mp3
 *.json
-*.txt
 *.prof
 data/
