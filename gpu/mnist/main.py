@@ -121,6 +121,70 @@ def plot_losses(exp_dir, suffix_filename, losses, disable_dropout = False, rever
     plt.savefig(f'{exp_dir}/losses_{suffix_filename}.png')
     # plt.show()
 
+def plot_all_losses(exp_dir, suffix_filename):
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
+    title = 'Train Losses'
+
+    # Plot 2 losses graph with epoch as legend
+    losses1_file = f"{exp_dir}/losses_{suffix_filename}.csv"
+    print(f'Loading {losses1_file}')
+    losses1 = pd.read_csv(losses1_file)
+    
+    losses2_file = f'{exp_dir}/losses_{suffix_filename}_reverse_data.csv'
+    print(f'Loading {losses2_file}')
+    losses2 = pd.read_csv(losses2_file)
+
+    losses3_file = f'{exp_dir}/losses_{suffix_filename}_dropout_disabled.csv'
+    print(f'Loading {losses3_file}')
+    losses3 = pd.read_csv(losses3_file)
+
+    losses4_file = f'{exp_dir}/losses_{suffix_filename}_dropout_disabled_reverse_data.csv'
+    print(f'Loading {losses4_file}')
+    losses4 = pd.read_csv(losses4_file)
+
+    # Plot big graph
+    plt.figure(figsize=(10, 10))
+
+    # Plot 4 graphs
+    plt.plot(losses1['train_loss'], label='Train Loss', color='red')
+    plt.plot(losses2['train_loss'], label='Train Loss (Reverse Data)', color='blue')
+    plt.plot(losses4['train_loss'], label='Train Loss (Dropout Disabled, Reverse Data)' , color='purple')
+    plt.plot(losses3['train_loss'], label='Train Loss (Dropout Disabled)' , color='green')
+    
+    # Limit y axis from 0 to 1
+    # plt.ylim(0, 0.5)
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('Train Loss')
+    plt.title(title)
+    img_file = f'{exp_dir}/losses_{suffix_filename}_merged_train.png'
+    print(f'Saving {img_file}')
+    plt.savefig(img_file)
+    # plt.show()
+
+    # Plot and save test losses
+    title = 'Test Losses'
+    plt.figure(figsize=(10, 10))
+
+    # Plot 4 graphs
+    plt.plot(losses1['test_loss'], label='Test Loss', color='red')
+    plt.plot(losses2['test_loss'], label='Test Loss (Reverse Data)', color='blue')
+    plt.plot(losses4['test_loss'], label='Test Loss (Dropout Disabled, Reverse Data)', color='purple')
+    plt.plot(losses3['test_loss'], label='Test Loss (Dropout Disabled)', color='green')
+
+    # Limit y axis from 0 to 1
+    plt.ylim(0, 0.5)
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('Test Loss')
+    plt.title(title)
+    img_file = f'{exp_dir}/losses_{suffix_filename}_merged_test.png'
+    print(f'Saving {img_file}')
+    plt.savefig(img_file)
+    # plt.show()
+
 def print_time(trained_time_consumed, test_time_consumed):
     print(f"Total training time: {sum(trained_time_consumed)}, Average test time: {sum(test_time_consumed) / len(test_time_consumed)}")
 
@@ -153,6 +217,8 @@ def main():
                         help='To disable dropout layers in the model.')
     parser.add_argument('--verbos', action='store_true', default=False,
                         help='Enable print.')
+    parser.add_argument('--merge-plot', action='store_true', default=False,
+                        help='Merge train losses and test losses.')
     # Add model name
     parser.add_argument('--model-name', type=str, default='cnn', metavar='M',
                         help='Model name (default: cnn)')
@@ -171,13 +237,18 @@ def main():
 
     # prepare base filename
     suffix_filename = get_suffix_filename(args, dv)
+    exp_dir = get_export_dir(args)
+
+    if args.merge_plot:
+        plot_all_losses(exp_dir, suffix_filename)
+        return
+
     if args.disable_dropout:
         suffix_filename += '_dropout_disabled'
     
     if args.reverse_data:
         suffix_filename += '_reverse_data'
 
-    exp_dir = get_export_dir(args)
 
     if args.read_only:
         losses = pd.read_csv(f'{exp_dir}/losses_{suffix_filename}.csv')
@@ -209,7 +280,7 @@ def main():
     if args.model_name == 'cnn':
         model = Net(args.disable_dropout).to(device)
     elif args.model_name == 'resnet':
-        model = SimpleResNet().to(device)
+        model = SimpleResNet(args.disable_dropout).to(device)
     else:
         raise ValueError(f"Model name {args.model_name} not supported")
 

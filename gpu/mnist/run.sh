@@ -6,6 +6,12 @@
 # For plotting resnet results
 # python main.py --epochs 5 --model-name resnet --read-only
 
+python main.py --epochs 5 --batch-size 64 --lr 1.0 --gamma 0.7 --model-name resnet
+python main.py --epochs 5 --batch-size 64 --lr 1.0 --gamma 0.7 --model-name resnet --reverse-data
+python main.py --epochs 5 --batch-size 64 --lr 1.0 --gamma 0.7 --model-name resnet --reverse-data --disable-dropout
+python main.py --epochs 5 --batch-size 64 --lr 1.0 --gamma 0.7 --model-name resnet --disable-dropout
+python main.py --epochs 5 --batch-size 64 --lr 1.0 --gamma 0.7 --model-name resnet --merge-plot
+
 
 # python main.py --epochs 5 --lr 1.0 --batch-size 1000 --gamma 0.7
 # python main.py --epochs 5 --lr 1.0 --batch-size 1000 --gamma 0.7 --reverse-data

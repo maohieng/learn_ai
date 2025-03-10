@@ -8,8 +8,9 @@ from torchvision import datasets, transforms
 from torch.optim.lr_scheduler import StepLR
 
 class SimpleResNet(nn.Module):
-    def __init__(self):
+    def __init__(self, disable_dropout=False):
         super(SimpleResNet, self).__init__()
+        self.disable_dropout = disable_dropout
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
@@ -28,7 +29,8 @@ class SimpleResNet(nn.Module):
         x = F.relu(self.conv4(x) + residual)
         x = x.view(-1, 64 * 7 * 7)
         x = F.relu(self.fc1(x))
-        x = self.dropout(x)
+        if not self.disable_dropout:
+            x = self.dropout(x)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
 
