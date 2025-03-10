@@ -1,5 +1,21 @@
 # Practical Session on GPU Computation Class
 Prepared by: Hieng MAO
+
+Date: 7th March 2025
+
+Source: [Github](https://github.com/maohieng/learn_ai/blob/main/gpu/Practical_session.md)
+
+**Table of Contents**
+- [Practical Session on GPU Computation Class](#practical-session-on-gpu-computation-class)
+  - [A First Network: MNIST](#a-first-network-mnist)
+    - [Exercise 1: Research, installation, first training](#exercise-1-research-installation-first-training)
+    - [Exercice 2: Code Analysis](#exercice-2-code-analysis)
+    - [Exercise 3: Analysis of Loss Evolution During Training](#exercise-3-analysis-of-loss-evolution-during-training)
+    - [Exercise 4: Parameter Variations](#exercise-4-parameter-variations)
+    - [Exercise 5: Performance Comparasion with ML alternative](#exercise-5-performance-comparasion-with-ml-alternative)
+    - [Exercise 6: First step toward reproducible research](#exercise-6-first-step-toward-reproducible-research)
+
+
 ## A First Network: MNIST
 ### Exercise 1: Research, installation, first training
 1. Conduct a thorough search about the MNIST (Modified National Institute of Standards and Technology) database. 
@@ -13,10 +29,10 @@ Since the searching for MNIST database, I have landed to a [Kaggle's page](https
 ```sh
 conda create --name myenv python=3.11
 ```
+
 The reason of python 3.11 is that I tried with python 3.12 but some package installation cannot be done with incompatibility error message.
 
-
-    2. Activate the environment
+2. Activate the environment
 ```sh
 conda activate myenv
 ```
@@ -39,7 +55,7 @@ Also install `h5py` for writing the `hdf5` file:
 conda install h5py
 ``` 
 
->>> Note: for running on the GPU, you can install pytorch that compatible with CUDA version (e.g., `11.7`) using command below. Replace `x.x` with the desired CUDA version:
+> Note: for running on the GPU, you can install pytorch that compatible with CUDA version (e.g., `11.7`) using command below. Replace `x.x` with the desired CUDA version:
 ```
 conda install pytorch torchvision torchaudio cudatoolkit=x.x -c pytorch
 ```
@@ -112,13 +128,15 @@ Since we just want the average loss per epoch, we modify the `train` and `test` 
 
 In order to keep tracking the working history and to effeciently plot the graph, these losses are saved to a csv file in an `exports` folder.
 
-Before we deep dive into the experiments below. Let us have a look at the dataset splitted for training and testing. Since both training and testing dataset use `DataLoader` to load data separatedly from pytorch's mnist API, the total of training data is **60,000** while the total of testing data is **1,000**. We use the training batch size of **64** while keeping the default testing batch size of **1,000**.  
+Before we deep dive into the experiments below. Let us have a look at the dataset splitted for training and testing. Since both training and testing dataset use `DataLoader` to load data separatedly from pytorch's mnist API, the total of training data is **60,000** while the total of testing data is **1,000**. We use the training batch size of **256** while keeping the default testing batch size of **1,000**.  
 
-2. **Experiment 1: Normal experiement**:
-This experiment uses training set for trainging and testing set for testing and keep enabling the dropout layers. [Figure 1](#) is a Losses graph of this experiment.
+2. **Experiment 1: Normal experiement**:  <a id='part:experiment1'></a>
+This experiment uses training set for trainging and testing set for testing and keep enabling the dropout layers. [Figure 1](#figure1) is a Losses graph of this experiment.
 
-![Losses Graph 1](mnist/exports/losses_14_64_1.0_0.7.png "Losses Graph 1")
-*Figure 1: Losses Graph for Experiement 1: Normal.*
+<figure id="figure1">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7.png" alt="Losses Graph 1">
+  <figcaption><i>Figure 1: Losses Graph for Experiement 1: Normal.</i></figcaption>
+</figure>
 
 According to this graph, the network learns from data very well starting from epoch 2 and going slicely decreasing.
 
@@ -126,11 +144,13 @@ Even the testing graph contains up and down trend, but its global form towards d
 
 Overal result from the test set, average loss is **0.0450** and its accuracy is **9844/10000 (98%)**.
 
-3. **Experiment 2: Reversed data**:
-This experiment, we reverse the training set for testing and the testing set for training but still keep enabling the dropout layers. [Figure 2](#) shows the Losses of this experiment.
+1. **Experiment 2: Reversed data**:  <a id='part:experiment2'></a>
+This experiment, we reverse the training set for testing and the testing set for training but still keep enabling the dropout layers. [Figure 2](#figure2) shows the Losses of this experiment.
 
-![Losses Graph 2](mnist/exports/losses_14_64_1.0_0.7_reverse_data.png "Losses Graph 2")
-*Figure 2: Losses Graph for Experiment 2: Reverse Data.*
+<figure id="figure2">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_reverse_data.png" alt="Losses Graph 2">
+  <figcaption><i>Figure 2: Losses Graph for Experiment 2: Reverse Data.</i></figcaption>
+</figure>
 
 In this experiment, the model learns from only **1,000** images but tested on **60,000** unseen images, it still performs as well as the first experiment (95%). The model learns very well since the beginning of the train (converge since the epoch 1). 
 
@@ -140,23 +160,27 @@ Overal result from the test set, average loss is **0.1670** and accuracy is **56
 
 So base on these 2 experiments, using dropout layers is very powerful to avoid the model overfitting and let the model learns very well on the appropriate number of dataset. 
 
-4. **Experiment 3: Reversed data + No Dropout layers**
-This experiment, we keep reversing the training and testing dataset and we disable the dropout layers in the network for training. [Figure 3](#) shows the Losses of this experiment.
+1. **Experiment 3: Reversed data + No Dropout layers** <a id='part:experiment3'></a>
+This experiment, we keep reversing the training and testing dataset and we disable the dropout layers in the network for training. [Figure 3](#figure3) shows the Losses of this experiment.
 
-![Losses Graph 3](mnist/exports/losses_14_64_1.0_0.7_dropout_disabled_reverse_data.png "Losses Graph 3")
-*Figure 3: Losses Graph for Experiment 3: Reverse Data + No Dropout Layers.*
+<figure id="figure3">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_dropout_disabled_reverse_data.png" alt="Losses Graph 3">
+  <figcaption><i>Figure 3: Losses Graph for Experiment 3: Reverse Data + No Dropout Layers.</i></figcaption>
+</figure>
 
-The model is trained only on the 1,000 dataset and is tested against 60,000 dataset with the dropout layers disabled,  we still receive the same result as the [Experiment 2](#) above with the overal result, test set got average loss of **0.1771** and accuracy of **56823/60000 (95%)** (sliccely different from the Experiment 2). 
+The model is trained only on the 1,000 dataset and is tested against 60,000 dataset with the dropout layers disabled,  we still receive the overal result, test set got average loss of **0.1771** and accuracy of **56823/60000 (95%)** which is slicely different from the [Experiment 2](#part:experiment2). 
 
 According to the testing graph, the model is still not overfitting and towards generalized even recieve the result as not good as our first experiment. 
 
-5. **Experiment 4: No Dropout layers**
+1. **Experiment 4: No Dropout layers** <a id='part:experiment4'></a>
 This experiment use training set for training and testing set for testing while removing/disabling the dropout layers for training.
 
-![Losses Graph 4](mnist/exports/losses_14_64_1.0_0.7_dropout_disabled.png "Losses Graph 4")
-*Figure 4: Losses Graph for Experiment 4: No Dropout Layers.*
+<figure id="figure4">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_dropout_disabled.png" alt="Losses Graph 4">
+  <figcaption><i>Figure 4: Losses Graph for Experiment 4: No Dropout Layers.</i></figcaption>
+</figure>
 
-The same as the [Experiment 1](#), the model learns very well. It converges at the second epoch and slicely decreasing the training losses.
+The same as the [Experiment 1](#part:experiment1), the model learns very well. It converges at the second epoch and slicely decreasing the training losses.
 
 The overal result on test set, the average loss is **0.0286** and the accuracy of **9918/10000 (99%)** which indicates the best accurracy among these experiments.
 
@@ -164,25 +188,324 @@ Eventhough the testing on training dataset received the best result, the testing
 
 We can conclude that this model design is very suitable for this tasks of regconition the handwriting number from [mnist dataset](http://yann.lecun.com/exdb/mnist/). Even less data for testing, the model learns very fast and performs very well on the unseen dataset. Keep in mind of using dropout layers, which is a very powerful technique for avoiding the model overfitting.
  
-6. Merge for training losses and testing losses graphs
+1. Merge for training losses and testing losses graphs
 
-![All Train Losses](mnist/exports/losses_14_64_1.0_0.7_merged_train.png "All Train Losses")
-*Figure 5: All Trains Losses Graph*
+<div style="display: flex; justify-content: space-between;">
+<figure id="figure5">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_train.png" alt="All Train Losses" >
+  <figcaption><i>Figure 5: All Trains Losses Graph.</i></figcaption>
+</figure>
 
-![All Test Losses](mnist/exports/losses_14_64_1.0_0.7_merged_test.png "All Test Losses")
-*Figure 5: All Tests Losses Graph*
+<figure id="figure6">
+  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_test.png" alt="All Test Losses">
+  <figcaption><i>Figure 6: All Test Losses Graph.</i></figcaption>
+</figure>
+</div>
 
 By combining the graphs, we can better observe the "overfitting" on the case of **Disable Dropout layers**. We can see that on the training graph ([Figure 5](#)), the learning losses of "Disable Dropout" have the best learning curve among other experiments. It indicates that the model / network learns very good on the seen data. On the other hand, the testing losses curve of "Disable Dropout" tends to increase in its global form. This indicates that the model infers very bad on the unseen data which leads to not generalize, therefore, "overfitting".
 
 ### Exercise 4: Parameter Variations
 Please find several experiments on each parameter as in [parameter_variation.xlsx](mnist/parameter_variations.xlsx).
 
-In this experiment, I found out that the training's batch size data affects to the model performance. The more training batch size we provided, the more generalize model. We experimented the training batch size of **64, 256, 1000, and 2048**. 
+In this experiment, we experimented the training batch size of **64, 256, 1000, and 2048**. 
 
-For batch size of 64 and 256, we hav discussed that the model of **Disable Dropout layers** is overfitting. But for 1000 of batch size, the model of **Normal/Default** experiment became overfitting while Disable Dropout model not. For batch size of 2048, the 4 experiments models are no more overffiting.
+<figure id="figure7">
+    <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs1000/gm0.7/losses_5_1000_1.0_0.7_cuda_merged_train.png" alt="All Train Losses" style="width: 48%;" >
+    <img src="mnist/exports/lr1.0/bs1000/gm0.7/losses_5_1000_1.0_0.7_cuda_merged_test.png" alt="All Test Losses" style="width: 48%;">
+    </div>
+  <figcaption><i>Figure 7: Experiment in training batch size of 1000.</i></figcaption>
+</figure>
 
-So the surprising result is **the number of batch size affects the model performance. The higher batch size makes the model more generalized.**. How high the batch size we take depends on how much RAM of the training computer has.
+<figure id="figure8">
+    <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/losses_5_2048_1.0_0.7_cuda_merged_train.png" alt="All Train Losses" style="width: 48%;" >
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/losses_5_2048_1.0_0.7_cuda_merged_test.png" alt="All Test Losses" style="width: 48%;">
+    </div>
+  <figcaption><i>Figure 8: Experiment in training batch size of 2048 (GPU device).</i></figcaption>
+</figure>
+
+For batch size of 64 and 256, we discussed earlier, the model of **Disable Dropout layers** is overfitting. But for 1000 of batch size, the model of **Normal/Default** experiment became "overfitting" while **Disable Dropout** model not. For batch size of 2048, the 4 experiments models are no longer become overffiting.
+
+So the surprising result is **the number of batch size affects the model performance. The higher batch size makes the model more generalized.**. How high the batch size, it depends on how much RAM and GPU VRAM we have for training.
 
 We can further discuss the difference of the model performance on CPU and GPU by keeping our batch size of **2048**. By analysis on the merged graphs of training and testing losses for CPU and GPU training, there is different result regarding these trainings. The different is the time consumtion on CPU training which took longer to train compare to GPU training.
 
+<figure id="figure8">
+    <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/losses_5_2048_1.0_0.7_cpu_merged_train.png" alt="All Train Losses" style="width: 50%;" >
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/losses_5_2048_1.0_0.7_cpu_merged_test.png" alt="All Test Losses" style="width: 50%;">
+    </div>
+  <figcaption><i>Figure 8: Experiment in training batch size of 2048 (CPU device).</i></figcaption>
+</figure> 
+
 ### Exercise 5: Performance Comparasion with ML alternative
+1. Resnet Model
+Resnet stands for Residual Networks, which designed to solve the **vanishing/exploding gradient** in the paper [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385). Vanishing/Exploding gradient is a problem in deep learning that causes the gradient to become 0 or too large. 
+
+We modified `main_resnet.py` in the same way as modifying `main.py`. Since I hav made a lot of changes to `main.py` for more general usage and for reusabe code, we can just import `SimpleResNet` from `main_resnet`.
+
+Below are some experiments on the Resnet model:
+
+<figure id="figure9">
+    <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs64/gm0.7/resnet/losses_5_64_1.0_0.7_cuda.png" alt="Resnet batch 64 gamma 0.7" style="width: 50%;" >
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/resnet/losses_5_2048_1.0_0.7_cuda.png" alt="Resnet bat 2048 gamma 0.7" style="width: 50%;">
+    <img src="mnist/exports/lr1.0/bs2048/gm1.0/resnet/losses_5_2048_1.0_1.0_cuda.png" alt="Resnet bat 2048 gamma 1.0" style="width: 50%;">
+    </div>
+  <figcaption><i>Figure 9: Resnet Experiments in batch size 64, 2048+gamma0.7, 2048+gamma1.0 respectively.</i></figcaption>
+</figure> 
+
+We found out the experiment on Resnet with **gamma 1.0** affects to the model performance (overfitted) while gamma 0.7 is not. We choose **gamma 0.7** for our best hyper parameter.
+
+Therefore, out best hyper-parameters: **learning rate 1.0, gamma 0.7, batch size 2048**.
+
+Further more on Resnet:
+
+<figure id="figure10">
+    <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs64/gm0.7/resnet/losses_5_64_1.0_0.7_cuda_merged_train.png" alt="Resnet Train Losses" style="width: 50%;">
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/resnet/losses_5_2048_1.0_0.7_cuda_merged_test.png" alt="Resnet Test Losses" style="width: 50%;">
+    </div>
+  <figcaption><i>Figure 10: Resnet Train and Test Losses Respectivly.</i></figcaption>
+</figure> 
+
+1. Time Consumption:
+
+Average inference time , first model (`Net`) got **1.87** millisecond per image, while the Resnet model (`SimpleResenet`) got **1.85** milliseconds per image.
+
+| Time \ Model| Net       | SimpleResnet       |
+|:---------------:|:----------------:|:----------------:|
+| Total training time (**seconds**)   | 45.27269768714905  | 48.19700574874878  |
+| Average testing time (**seconds**)   | 1.6809328079223633  | 1.7842947483062743  |
+| Average inferent time per image (**milliseconds**)   | **1.68**  | **1.78**  |
+*Table 1: Time Consumption between Net and SimpleResnet Model.*<a id='table:1'></a>
+
+> Note: Experiments are conducted on NVIDIA A40.
+
+3. **SVM**
+
+Support Vector Machine (SVM) is a supervised learning model / technique used for classification and regression tasks. Here is how SVM works (copied from Internet):
+- **Objective**: SVM aims to find the optimal hyperplane that best separate the data points to different classes in the feature spaces. The optimal hyperplane is the one that maximizes the margin between the closest points of the classes, known as support vector.
+- **Hyperplane**: In 2D space, a hyperplane is a line that separates the data points into 2 classes. In higher dimension, it becomes a plane or hyperplane.
+- **Margin**: The margin is the distance between hyperplane and the nearest data points from each class. SVM tries to maximize this margin to ensure that the model generalize well to unseen data.
+- **Support Vectors**: These are the data points that are closest to the hyperplane and influence its position and orientation. Only these points are used to determine the hyperplane.
+- **Kernel Trick**: SVM can efficiently perform a non-linear classification using the kernel trick. The kernel function transforms the input data into a higher-dimensional space where a linear hyperplane can be used to separate the classes. Common kernels include linear, polynomial, and radial basis function (RBF).
+- **Regularization Parameter (C)**: This parameter controls the trade-off between achieving a low error on the training data and minimizing the margin. A smaller C value allows for a larger margin but may result in some misclassifications, while a larger C value aims for fewer misclassifications but with a smaller margin.
+- **Gamma (γ)**: This parameter is specific to the RBF kernel and defines how far the influence of a single training example reaches. A low gamma value means that the influence is far, while a high gamma value means that the influence is close.
+
+Back to our code `main_svm.py`, an SVM classifier with an RBF kernel is created and trained on the MNIST dataset. The classifier is then evaluated on the test set, and the results are visualized using a confusion matrix and sample predictions.
+
+```
+Rapport de classification :
+               precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00        33
+           1       1.00      1.00      1.00        28
+           2       1.00      1.00      1.00        33
+           3       1.00      0.97      0.99        34
+           4       1.00      1.00      1.00        46
+           5       0.98      0.98      0.98        47
+           6       0.97      1.00      0.99        35
+           7       0.97      0.97      0.97        34
+           8       1.00      1.00      1.00        30
+           9       0.97      0.97      0.97        40
+
+    accuracy                           0.99       360
+   macro avg       0.99      0.99      0.99       360
+weighted avg       0.99      0.99      0.99       360
+```
+
+| Time \ Model| SVM       |
+|:---------------:|:----------------:|
+| Total training time (**seconds**)   | 0.07  |
+| Average inferent time per image (**milliseconds**)   | **0.07**  |
+*Table 2: Time Consumption of SVM Model.*<a id='table:2'></a>
+
+> Note: SVM runs on CPU of 42 cores of Intel(R) Xeon(R) Silver 4310 CPU @ 2.10GHz.
+
+SVM received very high accuracy of **99%** while its training time and inferent time is far less that the 2 models above while it runs on a powerfull CPU.
+
+4. Profiling
+-`Net`'s profile, `python -m cProfile -s time main.py --epochs 1`:
+```
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      952   10.558    0.011   10.558    0.011 {method 'poll' of 'select.poll' objects}
+    13276    2.052    0.000    2.053    0.000 {built-in method posix.read}
+      938    1.923    0.002    1.923    0.002 {method 'run_backward' of 'torch._C._EngineBase' objects}
+   103/97    0.709    0.007    0.823    0.008 {built-in method _imp.create_dynamic}
+     1896    0.638    0.000    0.638    0.000 {built-in method torch.conv2d}
+```
+
+- `SimpleResnet`'s profile, `python -m cProfile -s time main.py --model-name resnet --epochs 1`:
+```
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+      952    8.963    0.009    8.965    0.009 {method 'poll' of 'select.poll' objects}
+      938    2.621    0.003    2.621    0.003 {method 'run_backward' of 'torch._C._EngineBase' objects}
+    13276    2.155    0.000    2.157    0.000 {built-in method posix.read}
+     3792    0.956    0.000    0.956    0.000 {built-in method torch.conv2d}
+```
+- `SVM`s' profile, `python -m cProfile -s time main_svm.py`:
+```
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     1301    0.196    0.000    0.196    0.000 {built-in method marshal.loads}
+     7704    0.108    0.000    0.203    0.000 inspect.py:882(cleandoc)
+        1    0.070    0.070    0.070    0.070 _base.py:312(_dense_fit)
+     1054    0.065    0.000    0.066    0.000 __init__.py:65(check_isinstance)
+```
+
+We can see the model `Net` and `SimpleResnet` spends a lot of computing time on the `run_backward` function. The `run_backward` function consumes the computing resource to create the computational graphs in inverse order and applying the chain rule for calculating the gradient in order to update the model's weights. 
+
+- `Net` Losses
+
+|Run with  |train_loss   |test_loss    |train_time   |test_time    |
+|:---------------:|:---------------:|:----------------:|:---------------:|:----------------:|
+|`cProfile`  |0.0031381108467311907  |0.05394637870788574  |19.77141809463501  |2.6587979793548584 |
+|None |0.0031416568973955386  |0.05129043960571289  |13.139026403427124 |1.8098640441894531 |
+
+- `SimpleResnet` Losses
+
+|Run with  |train_loss   |test_loss    |train_time   |test_time    |
+|:---------------:|:---------------:|:----------------:|:---------------:|:----------------:|
+|`cProfile`  |0.002332769167984952 |0.02969202308654785  |21.171854972839355 |2.7359092235565186 |
+|None   |0.002300764407834504 |0.033819875717163085 |13.263878107070923 |1.9294891357421875 |
+
+- `SVM` Losses
+
+|Run with    |train_time   |test_time    |
+|:---------------:|:---------------:|:----------------:|
+|`cProfile`  |0.06949853897094727 |0.025006771087646484 |
+|None   |0.06062579154968262 |0.024107694625854492 |
+
+We can say: running with `python -m cProfile main.py...` takes more time to run than using `python main.py...`, while training and testing losses remain almost the same.
+
+### Exercise 6: First step toward reproducible research
+We exported the installed packages in current conda enviroment using `conda` and `pip` from 2 different OS, Linux and Windows.
+
+- Linux OS
+  - Using `pip freeze > exports/linux_pip_requirements.txt`
+Here is an example output file:
+```
+threadpoolctl @ file:///croot/threadpoolctl_1719407800858/work
+torch==2.5.1
+torchaudio==2.5.1
+torchvision==0.20.1
+tornado @ file:///croot/tornado_1733960490606/work
+triton==3.1.0
+typing_extensions @ file:///croot/typing_extensions_1734714854207/work
+tzdata @ file:///croot/python-tzdata_1690578112552/work
+unicodedata2 @ file:///croot/unicodedata2_1736541023050/work
+urllib3 @ file:///croot/urllib3_1737133630106/work
+wheel==0.45.1
+```
+We can see that the export file contains many local machine references (`file:///`) which can only be used to create new environment in the same machine (this linux machine) via `pip`. We cannot use it for neither other linux machine nor Windows machine.
+
+  - Using `conda list --export > exports/linux_conda_requirements2.txt
+Here is the example snapshot we got:
+```
+torch=2.5.1=pypi_0
+torchaudio=2.5.1=pypi_0
+torchtriton=3.1.0=py312
+torchvision=0.20.1=pypi_0
+tornado=6.4.2=pypi_0
+triton=3.1.0=pypi_0
+typing-extensions=4.12.2=pypi_0
+typing_extensions=4.12.2=py312h06a4308_0
+tzdata=2025a=h04d1e81_0
+unicodedata2=15.1.0=pypi_0
+urllib3=2.3.0=pypi_0
+wheel=0.45.1=pypi_0
+xcb-util-cursor=0.1.4=h5eee18b_0
+xz=5.6.4=h5eee18b_1
+yaml=0.2.5=h7b6447c_0
+zlib=1.2.13=h5eee18b_1
+zstd=1.5.6=hc292b87_0
+```
+We can try to use this file in the machine but new enviroment or on the Windows machine as will discussed later.
+
+  - Using `conda list --explicit > exports/linux_conda_requirements.txt`, in the format that can be used to recreate the enviroment.
+Here is an example in the file:
+```
+https://repo.anaconda.com/pkgs/main/linux-64/numpy-2.2.2-py312hc5e2394_0.conda
+https://repo.anaconda.com/pkgs/main/linux-64/numexpr-2.10.1-py312h3c60e43_0.conda
+https://repo.anaconda.com/pkgs/main/linux-64/scipy-1.15.1-py312hc5e2394_0.conda
+https://repo.anaconda.com/pkgs/main/linux-64/pandas-2.2.3-py312h6a678d5_0.conda
+https://repo.anaconda.com/pkgs/main/linux-64/scikit-learn-1.6.1-py312h6a678d5_0.conda
+https://conda.anaconda.org/pytorch/linux-64/pytorch-2.5.1-py3.12_cuda12.1_cudnn9.1.0_0.tar.bz2
+https://conda.anaconda.org/pytorch/linux-64/torchaudio-2.5.1-py312_cu121.tar.bz2
+https://conda.anaconda.org/pytorch/linux-64/torchtriton-3.1.0-py312.tar.bz2
+https://conda.anaconda.org/pytorch/linux-64/torchvision-0.20.1-py312_cu121.tar.bz2
+```
+This export format is good for recreating new environment since it point directly to the download URL rather than just version. But it can be used for the OS platform that it exported, for instance the export file above can be use on other Linux machine.
+
+- Windows OS
+  - Using `pip freeze > exports/win_pip_requirements.txt`
+Here is an example of snapshot result:
+```
+torch==2.5.1
+torchaudio==2.5.1
+torchvision==0.20.1
+tornado @ file:///C:/b/abs_7cyu943ybx/croot/tornado_1733960510898/work
+traitlets @ file:///home/conda/feedstock_root/build_artifacts/traitlets_1733367359838/work
+typing_extensions @ file:///C:/b/abs_0ffjxtihug/croot/typing_extensions_1734714875646/work
+tzdata @ file:///croot/python-tzdata_1690578112552/work
+unicodedata2 @ file:///C:/b/abs_dfnftvxi4k/croot/unicodedata2_1736543771112/work
+urllib3 @ file:///C:/b/abs_7bst06lizn/croot/urllib3_1737133657081/work
+wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_1733231326287/work
+Werkzeug @ file:///home/conda/feedstock_root/build_artifacts/werkzeug_1733160440960/work
+wheel==0.45.1
+win-inet-pton @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/win_inet_pton_1699472992992/work
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1732827521216/work
+```
+The same as exporting on Linux, the file contains local file references instead of package's version. This file could only be used in the same machine to create an environment via `pip`.
+
+  - Using `conda list --export > exports/win_conda_requirements.txt` 
+Here is an example snapshot of result:
+```
+torchaudio=2.5.1=py312_cpu
+torchvision=0.20.1=py312_cpu
+tornado=6.4.2=py312h827c3e9_0
+traitlets=5.14.3=pyhd8ed1ab_1
+typing_extensions=4.12.2=py312haa95532_0
+tzdata=2025a=h04d1e81_0
+ucrt=10.0.22621.0=h57928b3_1
+unicodedata2=15.1.0=py312h827c3e9_1
+urllib3=2.3.0=py312haa95532_0
+vc=14.42=haa95532_4
+vc14_runtime=14.42.34438=hfd919c2_24
+vs2015_runtime=14.42.34438=h7142326_24
+wcwidth=0.2.13=pyhd8ed1ab_1
+werkzeug=3.1.3=pyhd8ed1ab_1
+wheel=0.45.1=py312haa95532_0
+win_inet_pton=1.1.0=py312haa95532_0
+xz=5.6.4=h4754444_1
+yaml=0.2.5=he774522_0
+zeromq=4.3.5=ha9f60a1_7
+zipp=3.21.0=pyhd8ed1ab_1
+zlib=1.2.13=h8cc25b3_1
+zstd=1.5.6=h8880b57_0
+```
+This file contains specific information regarding the OS it exported from. Such as:
+```
+vc=14.42=haa95532_4
+vc14_runtime=14.42.34438=hfd919c2_24
+vs2015_runtime=14.42.34438=h7142326_24
+```
+```
+win_inet_pton=1.1.0=py312haa95532_0
+```
+We can use it to create a new conda environment on Windows OS, but need to be cleaned before use on other OS distribution (e.g. Linux).
+
+- Using `conda list --explicit > exports/win_conda_requirements2.txt` 
+Here is an example snapshot of result:
+```
+https://repo.anaconda.com/pkgs/main/win-64/numpy-2.2.2-py312hfd52020_0.conda
+https://repo.anaconda.com/pkgs/main/win-64/numexpr-2.10.1-py312h4cd664f_0.conda
+https://repo.anaconda.com/pkgs/main/win-64/scipy-1.15.1-py312hbb039d4_0.conda
+https://conda.anaconda.org/pytorch/win-64/torchaudio-2.5.1-py312_cpu.tar.bz2
+https://conda.anaconda.org/pytorch/win-64/torchvision-0.20.1-py312_cpu.tar.bz2
+https://repo.anaconda.com/pkgs/main/win-64/pandas-2.2.3-py312h5da7b33_0.conda
+https://repo.anaconda.com/pkgs/main/win-64/scikit-learn-1.6.1-py312h585ebfc_0.conda
+```
+This export format is good for creating new enviroment on Windows OS since it references directly to the download link for support Window 64. Therefore, we cannot use it for Windows 32, ...etc.
+
