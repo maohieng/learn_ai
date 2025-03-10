@@ -13,11 +13,22 @@ X_train, X_test, y_train, y_test = train_test_split(digits.data, digits.target, 
 # Create a SVM classifier
 clf = svm.SVC(kernel='rbf', gamma=0.001, C=100)
 
+started = time.time()
 # Train it
 clf.fit(X_train, y_train)
 
+duration = time.time() - started
+print(f"Training time (second): {duration}")
+
+started = time.time()
 # Evaluate it
 y_pred = clf.predict(X_test)
+
+duration = time.time() - started
+print(f"Prediction time (second): {duration}")
+
+print(f"Average Inferent time (millisecond): {duration * 1000 / len(y_test)}")
+
 
 # Afficher le rapport de classification
 print("Rapport de classification :\n", metrics.classification_report(y_test, y_pred))
