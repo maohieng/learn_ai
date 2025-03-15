@@ -14,6 +14,7 @@ Source: [Github](https://github.com/maohieng/learn_ai/blob/main/gpu/Practical_se
     - [Exercise 4: Parameter Variations](#exercise-4-parameter-variations)
     - [Exercise 5: Performance Comparasion with ML alternative](#exercise-5-performance-comparasion-with-ml-alternative)
     - [Exercise 6: First step toward reproducible research](#exercise-6-first-step-toward-reproducible-research)
+  - [AudioMNIST: Optimizing Data Loading](#audiomnist-optimizing-data-loading)
 
 
 ## A First Network: MNIST
@@ -190,17 +191,13 @@ We can conclude that this model design is very suitable for this tasks of regcon
  
 1. Merge for training losses and testing losses graphs
 
-<div style="display: flex; justify-content: space-between;">
 <figure id="figure5">
-  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_train.png" alt="All Train Losses" >
-  <figcaption><i>Figure 5: All Trains Losses Graph.</i></figcaption>
+  <div style="display: flex; justify-content: space-between;">
+    <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_train.png" alt="All Train Losses" style="width: 50%;">
+    <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_test.png" alt="All Test Losses" style="width: 50%;">
+  </div>
+  <figcaption><i>Figure 5: All Train and Test Losses Graph.</i></figcaption>
 </figure>
-
-<figure id="figure6">
-  <img src="mnist/exports/lr1.0/bs256/losses_14_256_1.0_0.7_merged_test.png" alt="All Test Losses">
-  <figcaption><i>Figure 6: All Test Losses Graph.</i></figcaption>
-</figure>
-</div>
 
 By combining the graphs, we can better observe the "overfitting" on the case of **Disable Dropout layers**. We can see that on the training graph ([Figure 5](#)), the learning losses of "Disable Dropout" have the best learning curve among other experiments. It indicates that the model / network learns very good on the seen data. On the other hand, the testing losses curve of "Disable Dropout" tends to increase in its global form. This indicates that the model infers very bad on the unseen data which leads to not generalize, therefore, "overfitting".
 
@@ -249,9 +246,9 @@ Below are some experiments on the Resnet model:
 
 <figure id="figure9">
     <div style="display: flex; justify-content: space-between;">
-    <img src="mnist/exports/lr1.0/bs64/gm0.7/resnet/losses_5_64_1.0_0.7_cuda.png" alt="Resnet batch 64 gamma 0.7" style="width: 50%;" >
-    <img src="mnist/exports/lr1.0/bs2048/gm0.7/resnet/losses_5_2048_1.0_0.7_cuda.png" alt="Resnet bat 2048 gamma 0.7" style="width: 50%;">
-    <img src="mnist/exports/lr1.0/bs2048/gm1.0/resnet/losses_5_2048_1.0_1.0_cuda.png" alt="Resnet bat 2048 gamma 1.0" style="width: 50%;">
+    <img src="mnist/exports/lr1.0/bs64/gm0.7/resnet/losses_5_64_1.0_0.7_cuda.png" alt="Resnet batch 64 gamma 0.7" style="width: 30%;" >
+    <img src="mnist/exports/lr1.0/bs2048/gm0.7/resnet/losses_5_2048_1.0_0.7_cuda.png" alt="Resnet bat 2048 gamma 0.7" style="width: 30%;">
+    <img src="mnist/exports/lr1.0/bs2048/gm1.0/resnet/losses_5_2048_1.0_1.0_cuda.png" alt="Resnet bat 2048 gamma 1.0" style="width: 30%;">
     </div>
   <figcaption><i>Figure 9: Resnet Experiments in batch size 64, 2048+gamma0.7, 2048+gamma1.0 respectively.</i></figcaption>
 </figure> 
@@ -380,11 +377,11 @@ We can see the model `Net` and `SimpleResnet` spends a lot of computing time on 
 We can say: running with `python -m cProfile main.py...` takes more time to run than using `python main.py...`, while training and testing losses remain almost the same.
 
 ### Exercise 6: First step toward reproducible research
-We exported the installed packages in current conda enviroment using `conda` and `pip` from 2 different OS, Linux and Windows.
+1. We exported the installed packages in current conda enviroment using `conda` and `pip` from 2 different OS, Linux and Windows.
 
 - Linux OS
-  - Using `pip freeze > exports/linux_pip_requirements.txt`
-Here is an example output file:
+  1. Using `pip freeze > exports/linux_pip_requirements.txt`
+Here is an example output file `linux_pip_requirements.txt`:
 ```
 threadpoolctl @ file:///croot/threadpoolctl_1719407800858/work
 torch==2.5.1
@@ -398,10 +395,10 @@ unicodedata2 @ file:///croot/unicodedata2_1736541023050/work
 urllib3 @ file:///croot/urllib3_1737133630106/work
 wheel==0.45.1
 ```
-We can see that the export file contains many local machine references (`file:///`) which can only be used to create new environment in the same machine (this linux machine) via `pip`. We cannot use it for neither other linux machine nor Windows machine.
+We can see that the export file contains many local machine references (`file:///`) which COULD only be used to create new environment in the same machine (this linux machine) via `pip`. Result (success or fail) of using this file will be discuss later below.
 
-  - Using `conda list --export > exports/linux_conda_requirements2.txt
-Here is the example snapshot we got:
+  2. Using `conda list --export > exports/linux_conda_requirements2.txt`
+Here is the example snapshot we got in file `linux_conda_requirements2.txt`:
 ```
 torch=2.5.1=pypi_0
 torchaudio=2.5.1=pypi_0
@@ -423,8 +420,8 @@ zstd=1.5.6=hc292b87_0
 ```
 We can try to use this file in the machine but new enviroment or on the Windows machine as will discussed later.
 
-  - Using `conda list --explicit > exports/linux_conda_requirements.txt`, in the format that can be used to recreate the enviroment.
-Here is an example in the file:
+  3. Using `conda list --explicit > exports/linux_conda_requirements.txt`, in the format that can be used to recreate the enviroment.
+Here is an example in the file `linux_conda_requirements.txt`:
 ```
 https://repo.anaconda.com/pkgs/main/linux-64/numpy-2.2.2-py312hc5e2394_0.conda
 https://repo.anaconda.com/pkgs/main/linux-64/numexpr-2.10.1-py312h3c60e43_0.conda
@@ -438,9 +435,27 @@ https://conda.anaconda.org/pytorch/linux-64/torchvision-0.20.1-py312_cu121.tar.b
 ```
 This export format is good for recreating new environment since it point directly to the download URL rather than just version. But it can be used for the OS platform that it exported, for instance the export file above can be use on other Linux machine.
 
+  4. Using `conda env export > exports/linux_environment.yml`
+Here is example snapshot of file `linux_environment.yml`:
+```
+name: new_env
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=5.1=1_gnu
+  - blas=1.0=mkl
+  ...
+  - wheel==0.45.1
+prefix: /home/rnd/anaconda3/envs/new_env
+```
+This file contains the dependency of local reference or "environment name".
+
 - Windows OS
   - Using `pip freeze > exports/win_pip_requirements.txt`
-Here is an example of snapshot result:
+Here is an example of snapshot result in file `win_pip_requirements.txt`:
 ```
 torch==2.5.1
 torchaudio==2.5.1
@@ -460,7 +475,7 @@ zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1732827521216/work
 The same as exporting on Linux, the file contains local file references instead of package's version. This file could only be used in the same machine to create an environment via `pip`.
 
   - Using `conda list --export > exports/win_conda_requirements.txt` 
-Here is an example snapshot of result:
+Here is an example snapshot of result in file `win_conda_requirements.txt`:
 ```
 torchaudio=2.5.1=py312_cpu
 torchvision=0.20.1=py312_cpu
@@ -509,3 +524,54 @@ https://repo.anaconda.com/pkgs/main/win-64/scikit-learn-1.6.1-py312h585ebfc_0.co
 ```
 This export format is good for creating new enviroment on Windows OS since it references directly to the download link for support Window 64. Therefore, we cannot use it for Windows 32, ...etc.
 
+1. Create new environment in the same machine
+- On Linux OS
+  1. `pip install -r mnist/exports/linux_pip_requirements.txt`
+
+Raises an error:
+```
+Processing /croot/bottleneck_1731058641041/work (from -r mnist/exports/linux_pip_requirements.txt (line 1))
+ERROR: Could not install packages due to an OSError: [Errno 2] No such file or directory: '/croot/bottleneck_1731058641041/work'
+```
+This case it does not work even in the same machine since we exported the installed packages from conda's environment using `pip`.
+
+  2. `conda create --name new_env python=3.12`, `conda install --file mnist/exports/linux_conda_requirements2.txt`
+
+This case still doesn't work when we export enviroment using `conda list --export > exports/linux_conda_requirements2.txt`
+
+  3. `conda install --file mnist/exports/linux_conda_requirements.txt`
+
+This case works fine as expected in the discussion above while we export the enviroment using `conda list --explicit > exports/linux_conda_requirements.txt`.
+
+- On Windows OS
+
+  1. We straight to use the method 3 that work on Linux OS above.
+
+    - Deactivate current enviroment
+      ```
+      conda deactivate
+      ```
+    - Create a new environment
+      ```
+      conda create --name new_env python=3.12
+      ```
+    - Activate new enviroment
+      ```
+      conda activate new_env
+      ```
+    - Install packages exported by `conda list --explicit`
+      ```
+      conda install --file exports\win_conda_requirements2.txt
+      ```
+  2. Run the yaml file export from Linux on Windows
+As mention, we exported a yml file from the Linux distribution using `conda env export > linux_environment.yml`, we try to create an environment in Windows using `conda env create -f exports\linux_environment.yml`. 
+
+As expected, this method does not work either.
+
+**Conclusion**
+
+Using conda to manage package dependency could be slicely more effeciency than pip but leads to unable to create an other environment on other OS distribution based on the exported file. Its heavy weight and required learning curve brings us inefficiently in work.
+
+Even pip is less effecient than conda, its light weight and simplicity still override these overhead!
+
+## AudioMNIST: Optimizing Data Loading
