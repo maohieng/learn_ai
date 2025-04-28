@@ -1,0 +1,12 @@
+[
+{"dept_id":101,"dept_name":"HR"}, 
+{"dept_id":102,"dept_name":"Engineering"}, 
+{"dept_id":103,"dept_name":"Marketing"},
+{"dept_id":104,"dept_name":"Finance"},
+{"dept_id":105,"dept_name":"Sales"},
+{"dept_id":106,"dept_name":"IT"},
+{"dept_id":107,"dept_name":"Support"},
+{"dept_id":108,"dept_name":"R&D"},
+{"dept_id":109,"dept_name":"Legal"},
+{"dept_id":110,"dept_name":"Admin"}
+]
